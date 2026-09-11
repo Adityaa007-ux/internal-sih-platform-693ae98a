@@ -199,7 +199,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </span>
         <div className="min-w-0">
           <p className="font-display text-sm font-bold leading-tight">Internal SIH Platform</p>
-          <p className="truncate text-[11px] text-sidebar-foreground/60">Internal SIH</p>
+          <p className="truncate text-[11px] text-sidebar-foreground/60">Smart India Hackathon</p>
         </div>
         <button className="ml-auto lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu">
           <X className="size-5" />

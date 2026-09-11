@@ -136,6 +136,56 @@ export type Database = {
           },
         ]
       }
+      certificates: {
+        Row: {
+          certificate_id: string
+          cycle_year: number
+          id: string
+          institution: string
+          issued_at: string
+          ps_id: string | null
+          ps_title: string | null
+          student_name: string
+          team_id: string
+          team_name: string
+          user_id: string
+        }
+        Insert: {
+          certificate_id: string
+          cycle_year: number
+          id?: string
+          institution?: string
+          issued_at?: string
+          ps_id?: string | null
+          ps_title?: string | null
+          student_name: string
+          team_id: string
+          team_name: string
+          user_id: string
+        }
+        Update: {
+          certificate_id?: string
+          cycle_year?: number
+          id?: string
+          institution?: string
+          issued_at?: string
+          ps_id?: string | null
+          ps_title?: string | null
+          student_name?: string
+          team_id?: string
+          team_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deadlines: {
         Row: {
           created_at: string
@@ -340,6 +390,62 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "mentorship_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_ratings: {
+        Row: {
+          availability: number
+          communication: number
+          created_at: string
+          feedback: string
+          guidance: number
+          helpfulness: number
+          id: string
+          mentor_kind: string
+          mentor_label: string
+          overall: number
+          rater_user_id: string
+          team_id: string
+          technical: number
+        }
+        Insert: {
+          availability: number
+          communication: number
+          created_at?: string
+          feedback?: string
+          guidance: number
+          helpfulness: number
+          id?: string
+          mentor_kind: string
+          mentor_label?: string
+          overall: number
+          rater_user_id: string
+          team_id: string
+          technical: number
+        }
+        Update: {
+          availability?: number
+          communication?: number
+          created_at?: string
+          feedback?: string
+          guidance?: number
+          helpfulness?: number
+          id?: string
+          mentor_kind?: string
+          mentor_label?: string
+          overall?: number
+          rater_user_id?: string
+          team_id?: string
+          technical?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_ratings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -596,27 +702,96 @@ export type Database = {
         }
         Relationships: []
       }
+      sih_cycles: {
+        Row: {
+          check_note: string
+          check_status: string
+          created_at: string
+          edition_label: string
+          edition_year: number
+          id: string
+          last_checked_at: string | null
+          official_end: string | null
+          official_start: string | null
+          source_url: string
+          updated_at: string
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          check_note?: string
+          check_status?: string
+          created_at?: string
+          edition_label?: string
+          edition_year: number
+          id?: string
+          last_checked_at?: string | null
+          official_end?: string | null
+          official_start?: string | null
+          source_url?: string
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          check_note?: string
+          check_status?: string
+          created_at?: string
+          edition_label?: string
+          edition_year?: number
+          id?: string
+          last_checked_at?: string | null
+          official_end?: string | null
+          official_start?: string | null
+          source_url?: string
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           created_at: string
+          department: string | null
+          email: string | null
+          gender: string | null
           is_leader: boolean
           member_name: string
+          mobile: string | null
+          prn: string | null
           team_id: string
           user_id: string
+          year: string | null
         }
         Insert: {
           created_at?: string
+          department?: string | null
+          email?: string | null
+          gender?: string | null
           is_leader?: boolean
           member_name?: string
+          mobile?: string | null
+          prn?: string | null
           team_id: string
           user_id: string
+          year?: string | null
         }
         Update: {
           created_at?: string
+          department?: string | null
+          email?: string | null
+          gender?: string | null
           is_leader?: boolean
           member_name?: string
+          mobile?: string | null
+          prn?: string | null
           team_id?: string
           user_id?: string
+          year?: string | null
         }
         Relationships: [
           {
@@ -630,13 +805,20 @@ export type Database = {
       }
       teams: {
         Row: {
+          assigned_mentor_id: string | null
           campus: string | null
           code: string
           created_at: string
+          cycle_year: number | null
           department: string | null
+          finalized: boolean
+          finalized_at: string | null
           id: string
+          industrial_mentor_user_id: string | null
+          institution_id: string | null
           leader_id: string
           name: string
+          process_completed: boolean
           selected_at: string | null
           selected_by: string | null
           selected_ps_id: string | null
@@ -645,13 +827,20 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_mentor_id?: string | null
           campus?: string | null
           code: string
           created_at?: string
+          cycle_year?: number | null
           department?: string | null
+          finalized?: boolean
+          finalized_at?: string | null
           id?: string
+          industrial_mentor_user_id?: string | null
+          institution_id?: string | null
           leader_id: string
           name: string
+          process_completed?: boolean
           selected_at?: string | null
           selected_by?: string | null
           selected_ps_id?: string | null
@@ -660,13 +849,20 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_mentor_id?: string | null
           campus?: string | null
           code?: string
           created_at?: string
+          cycle_year?: number | null
           department?: string | null
+          finalized?: boolean
+          finalized_at?: string | null
           id?: string
+          industrial_mentor_user_id?: string | null
+          institution_id?: string | null
           leader_id?: string
           name?: string
+          process_completed?: boolean
           selected_at?: string | null
           selected_by?: string | null
           selected_ps_id?: string | null
@@ -674,7 +870,22 @@ export type Database = {
           selected_ps_title?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "teams_assigned_mentor_id_fkey"
+            columns: ["assigned_mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

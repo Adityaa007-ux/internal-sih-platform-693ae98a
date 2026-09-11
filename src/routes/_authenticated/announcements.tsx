@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/announcements")({
   head: () => ({
     meta: [
       { title: "Announcements — Internal SIH | Internal SIH" },
-      { name: "description", content: "All official Internal SIH 2026 announcements and notices for JSPM Group participants." },
+      { name: "description", content: "All official Internal SIH 2026 announcements and notices for all participants." },
       { property: "og:title", content: "Internal SIH Announcements" },
       { property: "og:description", content: "Official notices for the Internal Smart India Hackathon." },
     ],

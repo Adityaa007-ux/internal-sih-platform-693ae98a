@@ -40,7 +40,7 @@ function DeadlinesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Deadlines" description="The official Internal SIH 2026 timeline across all JSPM Group campuses." icon={CalendarClock} />
+      <PageHeader title="Deadlines" description="The official Internal SIH 2026 timeline across all participating campuses." icon={CalendarClock} />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading timeline…</p>

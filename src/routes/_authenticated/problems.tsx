@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/problems")({
           "Browse SIH problem statements by theme, category and difficulty, read full details and select a statement for your Internal SIH team.",
       },
       { property: "og:title", content: "SIH Problem Statement Explorer — Internal SIH Platform" },
-      { property: "og:description", content: "Search and filter Smart India Hackathon problem statements for JSPM Group teams." },
+      { property: "og:description", content: "Search and filter Smart India Hackathon problem statements across participating institutions." },
     ],
   }),
   component: ProblemExplorer,

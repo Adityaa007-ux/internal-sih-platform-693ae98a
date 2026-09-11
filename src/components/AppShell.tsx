@@ -195,7 +195,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-3 px-5 py-5">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl brand-gradient font-display text-sm font-bold text-primary-foreground">
-          JGI
+          ISIH
         </span>
         <div className="min-w-0">
           <p className="font-display text-sm font-bold leading-tight">Internal SIH Platform</p>

@@ -34,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { property: "og:title", content: "Internal SIH Dashboard — Internal SIH Portal" },
       {
         property: "og:description",
-        content: "AI-powered Internal Smart India Hackathon management and evaluation platform for JSPM Group campuses.",
+        content: "AI-powered Internal Smart India Hackathon management and evaluation platform for participating institutions.",
       },
     ],
   }),
@@ -385,7 +385,7 @@ function AdminDashboard() {
     <div className="space-y-6">
       <PageHeader
         title="Admin dashboard"
-        description="Internal SIH 2026 across four JSPM Group campuses — registrations, evaluation progress and result publication."
+        description="Internal SIH 2026 across all participating campuses — registrations, evaluation progress and result publication."
         icon={Trophy}
         actions={
           <>

@@ -29,7 +29,7 @@ function AdminHome() {
     <div className="space-y-6">
       <PageHeader
         title="Admin Portal"
-        description="Server-verified administrator control centre for Internal SIH 2026 across all JSPM Group campuses."
+        description="Server-verified administrator control centre for Internal SIH 2026 across all participating campuses."
         icon={UserCog}
       />
 

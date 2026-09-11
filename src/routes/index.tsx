@@ -88,6 +88,7 @@ function AuthPage() {
   const gate = useServerFn(assertAccountActive);
   const lookup = useServerFn(lookupInstitutionByEmail);
   const campusesFor = useServerFn(listCampuses);
+  const instSearchFn = useServerFn(searchInstitutions);
   const humanChallenge = useServerFn(newHumanChallenge);
 
   const [role, setRole] = useState<PortalRole | null>(null);
@@ -258,6 +259,8 @@ function AuthPage() {
       setInstitution(res.institution);
       setCampuses(res.campuses);
       setCampusId(res.campuses[0]?.id ?? "");
+      setInstSearch(res.institution?.official_name ?? "");
+      setInstResults([]);
       setStep("campus");
     } catch (e) {
       err(e, "Enter a valid email address.");

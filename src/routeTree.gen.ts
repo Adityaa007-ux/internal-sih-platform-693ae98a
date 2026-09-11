@@ -37,6 +37,7 @@ import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedTeamRegistrationRouteImport } from './routes/_authenticated/team-registration'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminStudentsRouteImport } from './routes/_authenticated/admin/students'
+import { Route as ApiPublicHooksCycleSyncRouteImport } from './routes/api/public/hooks/cycle-sync'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -185,6 +186,11 @@ const AuthenticatedAdminStudentsRoute =
     path: '/students',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const ApiPublicHooksCycleSyncRoute = ApiPublicHooksCycleSyncRouteImport.update({
+  id: '/api/public/hooks/cycle-sync',
+  path: '/api/public/hooks/cycle-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/team-registration': typeof AuthenticatedTeamRegistrationRoute
   '/admin/students': typeof AuthenticatedAdminStudentsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/cycle-sync': typeof ApiPublicHooksCycleSyncRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/team-registration': typeof AuthenticatedTeamRegistrationRoute
   '/admin/students': typeof AuthenticatedAdminStudentsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/cycle-sync': typeof ApiPublicHooksCycleSyncRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/_authenticated/team-registration': typeof AuthenticatedTeamRegistrationRoute
   '/_authenticated/admin/students': typeof AuthenticatedAdminStudentsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/cycle-sync': typeof ApiPublicHooksCycleSyncRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/team-registration'
     | '/admin/students'
     | '/admin/'
+    | '/api/public/hooks/cycle-sync'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/team-registration'
     | '/admin/students'
     | '/admin'
+    | '/api/public/hooks/cycle-sync'
   id:
     | '__root__'
     | '/'
@@ -362,12 +373,14 @@ export interface FileRouteTypes {
     | '/_authenticated/team-registration'
     | '/_authenticated/admin/students'
     | '/_authenticated/admin/'
+    | '/api/public/hooks/cycle-sync'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicHooksCycleSyncRoute: typeof ApiPublicHooksCycleSyncRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -568,6 +581,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminStudentsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/api/public/hooks/cycle-sync': {
+      id: '/api/public/hooks/cycle-sync'
+      path: '/api/public/hooks/cycle-sync'
+      fullPath: '/api/public/hooks/cycle-sync'
+      preLoaderRoute: typeof ApiPublicHooksCycleSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -646,6 +666,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicHooksCycleSyncRoute: ApiPublicHooksCycleSyncRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

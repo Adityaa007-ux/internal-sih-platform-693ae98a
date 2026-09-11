@@ -191,3 +191,108 @@ export const listTeamSelections = createServerFn({ method: "GET" })
     }));
   });
 
+
+/* ------------------------------------------------------------------ */
+/* Team creation — exactly 6 members, at least one female              */
+/* ------------------------------------------------------------------ */
+
+const memberSchema = z.object({
+  member_name: z.string().trim().min(2, "Every member needs a full name.").max(120),
+  prn: z.string().trim().min(2, "Every member needs a PRN.").max(40),
+  email: z.string().trim().email("Enter a valid email for every member.").max(160),
+  mobile: z.string().trim().regex(/^\d{10}$/, "Every member needs a 10-digit mobile number."),
+  gender: z.enum(["female", "male", "other"]),
+  department: z.string().trim().min(2, "Every member needs a department.").max(120),
+  year: z.string().trim().min(2).max(10),
+});
+
+const createTeamSchema = z.object({
+  name: z.string().trim().min(3, "Team name must be at least 3 characters.").max(120),
+  campus: z.string().trim().max(120).optional(),
+  department: z.string().trim().max(120).optional(),
+  members: z.array(memberSchema),
+});
+
+export const TEAM_SIZE = 6;
+
+/**
+ * Creates and finalises a team. SIH college-level rules: exactly six students
+ * including the leader, and at least one female member.
+ */
+export const createTeam = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => createTeamSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { teamCode } = await import("./auth.server");
+
+    const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    if (!(roleRows ?? []).map((r) => String(r.role)).includes("student"))
+      throw new Error("Only student accounts can create a team.");
+
+    const members = data.members;
+    if (members.length !== TEAM_SIZE) throw new Error(`A team must have exactly ${TEAM_SIZE} members.`);
+    if (!members.some((m) => m.gender === "female"))
+      throw new Error("A team must contain at least one female member. Please add a female team member.");
+
+    const prns = members.map((m) => m.prn.trim().toUpperCase());
+    const emails = members.map((m) => m.email.trim().toLowerCase());
+    const mobiles = members.map((m) => m.mobile.trim());
+    if (new Set(prns).size !== prns.length) throw new Error("The same student is listed more than once (duplicate PRN).");
+    if (new Set(emails).size !== emails.length) throw new Error("Two members share the same email address.");
+    if (new Set(mobiles).size !== mobiles.length) throw new Error("Two members share the same mobile number.");
+
+    const { getMyTeamFor } = await import("./team.server");
+    if (await getMyTeamFor(supabase, userId)) throw new Error("You already belong to a team.");
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, campus, department, institution_id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    const insert = await supabase
+      .from("teams")
+      .insert({
+        name: data.name.trim(),
+        code: teamCode(),
+        leader_id: userId,
+        campus: data.campus ?? profile?.campus ?? null,
+        department: data.department ?? profile?.department ?? null,
+        institution_id: profile?.institution_id ?? null,
+        cycle_year: new Date().getUTCFullYear(),
+        finalized: true,
+        finalized_at: new Date().toISOString(),
+      })
+      .select("id, code")
+      .single();
+    if (insert.error || !insert.data) throw new Error(insert.error?.message ?? "Could not create your team.");
+
+    const rows = members.map((m, i) => ({
+      team_id: insert.data.id,
+      // The leader row is the signed-in student; other rows are roster entries.
+      user_id: i === 0 ? userId : crypto.randomUUID(),
+      member_name: m.member_name.trim(),
+      is_leader: i === 0,
+      gender: m.gender,
+      prn: m.prn.trim().toUpperCase(),
+      email: m.email.trim().toLowerCase(),
+      mobile: m.mobile.trim(),
+      department: m.department.trim(),
+      year: m.year,
+    }));
+    const memberInsert = await supabase.from("team_members").insert(rows);
+    if (memberInsert.error) {
+      await supabase.from("teams").delete().eq("id", insert.data.id);
+      throw new Error(memberInsert.error.message);
+    }
+
+    await supabase.from("audit_log").insert({
+      actor: userId,
+      actor_label: profile?.full_name || "",
+      action: "team.created",
+      detail: `${data.name.trim()} (${insert.data.code}) finalised with 6 members`,
+    });
+
+    return { ok: true, teamId: insert.data.id, code: insert.data.code };
+  });

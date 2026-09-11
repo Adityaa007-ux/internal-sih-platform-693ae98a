@@ -198,8 +198,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           JGI
         </span>
         <div className="min-w-0">
-          <p className="font-display text-sm font-bold leading-tight">JGI-SIH Portal</p>
-          <p className="truncate text-[11px] text-sidebar-foreground/60">JSPM Group Internal SIH</p>
+          <p className="font-display text-sm font-bold leading-tight">Internal SIH Platform</p>
+          <p className="truncate text-[11px] text-sidebar-foreground/60">Internal SIH</p>
         </div>
         <button className="ml-auto lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu">
           <X className="size-5" />
@@ -401,7 +401,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
 
         <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
-          JSPM Group Internal SIH Portal (JGI-SIH) · Prototype with demo data · Final selection is made by the faculty
+          Internal SIH Platform · Prototype with demo data · Final selection is made by the faculty
           panel in the offline presentation round.
         </footer>
       </div>

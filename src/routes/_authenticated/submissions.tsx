@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/submissions")({
   head: () => ({
     meta: [
-      { title: "Submissions — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Submissions — Internal SIH | Internal SIH" },
       { name: "description", content: "All Internal SIH 2026 team proposal submissions with AI scores and similarity risk." },
-      { property: "og:title", content: "JGI-SIH Submissions" },
-      { property: "og:description", content: "Track every proposal submitted for the JSPM Group Internal SIH." },
+      { property: "og:title", content: "Internal SIH Submissions" },
+      { property: "og:description", content: "Track every proposal submitted for the Internal SIH." },
     ],
   }),
   component: SubmissionsPage,

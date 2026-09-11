@@ -1,4 +1,4 @@
-// Server-only auth helpers for the JGI-SIH portal.
+// Server-only auth helpers for the Internal SIH Platform.
 // No secrets are ever returned to the client from here.
 
 export const OTP_TTL_MINUTES = 10;
@@ -68,5 +68,5 @@ export function needsApproval(role: PortalRole): boolean {
 export function teamCode(): string {
   const bytes = new Uint32Array(1);
   crypto.getRandomValues(bytes);
-  return `JGI-T${String(1000 + ((bytes[0] ?? 0) % 9000))}`;
+  return `ISIH-T${String(1000 + ((bytes[0] ?? 0) % 9000))}`;
 }

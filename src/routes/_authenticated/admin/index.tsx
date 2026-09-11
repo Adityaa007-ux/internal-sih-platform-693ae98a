@@ -8,14 +8,14 @@ import { PageHeader, StatCard } from "@/components/common";
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
     meta: [
-      { title: "Admin Portal — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Admin Portal — Internal SIH | Internal SIH" },
       {
         name: "description",
         content:
-          "Administrator control centre for the JSPM Group Internal SIH portal: students, announcements, deadlines, mentors and results.",
+          "Administrator control centre for the Internal SIH portal: students, announcements, deadlines, mentors and results.",
       },
-      { property: "og:title", content: "JGI-SIH Admin Portal" },
-      { property: "og:description", content: "Manage the JSPM Group Internal Smart India Hackathon end to end." },
+      { property: "og:title", content: "Internal SIH Admin Portal" },
+      { property: "og:description", content: "Manage the Internal Smart India Hackathon end to end." },
     ],
   }),
   component: AdminHome,

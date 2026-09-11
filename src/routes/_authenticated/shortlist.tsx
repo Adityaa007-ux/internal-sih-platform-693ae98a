@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/shortlist")({
   head: () => ({
     meta: [
-      { title: "Shortlist — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Shortlist — Internal SIH | Internal SIH" },
       { name: "description", content: "Ranked Internal SIH 2026 shortlist combining AI proposal scores, faculty evaluation and similarity risk." },
-      { property: "og:title", content: "JGI-SIH Shortlist" },
+      { property: "og:title", content: "Internal SIH Shortlist" },
       { property: "og:description", content: "Ranked teams advancing to the offline presentation round." },
     ],
   }),

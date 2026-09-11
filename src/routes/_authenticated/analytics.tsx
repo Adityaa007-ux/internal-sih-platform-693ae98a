@@ -7,9 +7,9 @@ import { PageHeader, StatCard } from "@/components/common";
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({
     meta: [
-      { title: "Analytics — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Analytics — Internal SIH | Internal SIH" },
       { name: "description", content: "Participation, submission and evaluation analytics across JSPM Group campuses for Internal SIH 2026." },
-      { property: "og:title", content: "JGI-SIH Analytics" },
+      { property: "og:title", content: "Internal SIH Analytics" },
       { property: "og:description", content: "Campus-wise participation and evaluation insights for the Internal SIH." },
     ],
   }),

@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// JGI-SIH — AI service layer (DEMO implementation).
+// Internal SIH — AI service layer (DEMO implementation).
 //
 // Every AI capability in the portal goes through this module. The functions
 // below are deliberately async and return the same shapes a real service would
@@ -420,7 +420,7 @@ const RULES: Rule[] = [
   {
     test: /(register|registration|team|member|lock)/i,
     answer:
-      "Team registration takes 4 to 6 members, one of whom is the leader. Go to **Team Registration**, fill campus, department and contact details, add each member with PRN and skills, then submit.\n\nOn submission the portal generates your Team ID and Registration Number automatically. **Team membership is locked after registration** — this mirrors the real JSPM process and prevents last-minute reshuffling.",
+      "Team registration takes 4 to 6 members, one of whom is the leader. Go to **Team Registration**, fill campus, department and contact details, add each member with PRN and skills, then submit.\n\nOn submission the portal generates your Team ID and Registration Number automatically. **Team membership is locked after registration** — this mirrors the standard Internal SIH process and prevents last-minute reshuffling.",
   },
   {
     test: /(deadline|last date|when.*(submit|due))/i,
@@ -445,7 +445,7 @@ const RULES: Rule[] = [
   {
     test: /(hello|hi|hey|namaste|good (morning|evening|afternoon))/i,
     answer:
-      "Hello! I'm the JGI-SIH AI Assistant. I can help with problem statements, proposal writing, similarity concerns, scoring criteria, deadlines and how the selection process works. What would you like help with?",
+      "Hello! I'm the Internal SIH AI Assistant. I can help with problem statements, proposal writing, similarity concerns, scoring criteria, deadlines and how the selection process works. What would you like help with?",
   },
   {
     test: /(thank|thanks|great|awesome)/i,

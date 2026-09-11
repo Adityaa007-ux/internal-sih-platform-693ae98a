@@ -11,13 +11,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/analyzer")({
   head: () => ({
     meta: [
-      { title: "AI Proposal Analyzer — JGI-SIH Portal" },
+      { title: "AI Proposal Analyzer — Internal SIH Platform" },
       {
         name: "description",
         content:
           "Run AI analysis on an Internal SIH proposal to get an overall quality score, strengths, weaknesses, missing sections and improvement recommendations.",
       },
-      { property: "og:title", content: "AI Proposal Analyzer — JGI-SIH Portal" },
+      { property: "og:title", content: "AI Proposal Analyzer — Internal SIH Platform" },
       { property: "og:description", content: "AI-powered proposal quality evaluation as decision support for faculty reviewers." },
     ],
   }),

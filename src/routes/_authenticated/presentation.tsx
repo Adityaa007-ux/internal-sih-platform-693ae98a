@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/presentation")({
   head: () => ({
     meta: [
-      { title: "Presentation Round — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Presentation Round — Internal SIH | Internal SIH" },
       { name: "description", content: "Offline faculty presentation schedule and panel outcomes for shortlisted Internal SIH 2026 teams." },
-      { property: "og:title", content: "JGI-SIH Presentation Round" },
+      { property: "og:title", content: "Internal SIH Presentation Round" },
       { property: "og:description", content: "Schedules, panels and final outcomes for the offline presentation round." },
     ],
   }),

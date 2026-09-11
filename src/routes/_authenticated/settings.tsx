@@ -14,10 +14,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — JGI-SIH | JSPM Group Internal SIH" },
-      { name: "description", content: "Manage your JGI-SIH profile details, campus, department and account controls." },
-      { property: "og:title", content: "JGI-SIH Settings" },
-      { property: "og:description", content: "Profile and account controls for the JSPM Group Internal SIH Portal." },
+      { title: "Settings — Internal SIH | Internal SIH" },
+      { name: "description", content: "Manage your Internal SIH profile details, campus, department and account controls." },
+      { property: "og:title", content: "Internal SIH Settings" },
+      { property: "og:description", content: "Profile and account controls for the Internal SIH Portal." },
     ],
   }),
   component: SettingsPage,

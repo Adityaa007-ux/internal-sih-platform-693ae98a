@@ -140,7 +140,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const team: Team = {
           ...data,
           id: `T-${String(n).padStart(3, "0")}`,
-          regId: `JGI-SIH-2026-${String(n).padStart(4, "0")}`,
+          regId: `ISIH-2026-${String(n).padStart(4, "0")}`,
           createdAt: new Date().toISOString(),
         };
         setState((s) => ({ ...s, teams: [...s.teams, team], currentTeamId: team.id }));

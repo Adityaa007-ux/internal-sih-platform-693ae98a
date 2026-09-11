@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/my-team")({
   head: () => ({
     meta: [
-      { title: "My Team — JGI-SIH Portal" },
+      { title: "My Team — Internal SIH Platform" },
       {
         name: "description",
         content: "View your Internal SIH team profile, locked member list, selected problem statement and current selection stage.",
       },
-      { property: "og:title", content: "My Team — JGI-SIH Portal" },
-      { property: "og:description", content: "Team profile and selection progress in the JSPM Group Internal SIH Portal." },
+      { property: "og:title", content: "My Team — Internal SIH Platform" },
+      { property: "og:description", content: "Team profile and selection progress in the Internal SIH Portal." },
     ],
   }),
   component: MyTeam,

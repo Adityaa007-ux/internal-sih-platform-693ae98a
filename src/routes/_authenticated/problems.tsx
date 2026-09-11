@@ -13,13 +13,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 export const Route = createFileRoute("/_authenticated/problems")({
   head: () => ({
     meta: [
-      { title: "Problem Explorer — JGI-SIH Portal" },
+      { title: "Problem Explorer — Internal SIH Platform" },
       {
         name: "description",
         content:
           "Browse SIH problem statements by theme, category and difficulty, read full details and select a statement for your Internal SIH team.",
       },
-      { property: "og:title", content: "SIH Problem Statement Explorer — JGI-SIH Portal" },
+      { property: "og:title", content: "SIH Problem Statement Explorer — Internal SIH Platform" },
       { property: "og:description", content: "Search and filter Smart India Hackathon problem statements for JSPM Group teams." },
     ],
   }),
@@ -77,7 +77,7 @@ function ProblemExplorer() {
     <div className="space-y-6">
       <PageHeader
         title="Problem statement explorer"
-        description="Official SIH-style problem statements available for JSPM Group Internal SIH 2026. Search, filter and select the statement your team will work on."
+        description="Official SIH-style problem statements available for Internal SIH 2026. Search, filter and select the statement your team will work on."
         icon={FileSearch}
         actions={<DemoBadge />}
       />

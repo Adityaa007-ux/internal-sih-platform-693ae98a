@@ -1,4 +1,4 @@
-// Source: SIH 2025 Grand Finale result table supplied in the JGI-SIH Master Documentation.
+// Source: SIH 2025 Grand Finale result table supplied in the Internal SIH Master Documentation.
 // These are SOURCE RECORDS (PS ID, category, organization, department, team + idea IDs,
 // team name and team-lead text). The source does NOT contain full problem-statement
 // descriptions, so none are invented here.

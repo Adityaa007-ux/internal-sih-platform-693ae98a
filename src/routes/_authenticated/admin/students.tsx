@@ -11,9 +11,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/admin/students")({
   head: () => ({
     meta: [
-      { title: "Students — JGI-SIH Admin | JSPM Group Internal SIH" },
+      { title: "Students — Internal SIH Admin | Internal SIH" },
       { name: "description", content: "Administrator view of all registered Internal SIH students with account status controls." },
-      { property: "og:title", content: "JGI-SIH Admin — Students" },
+      { property: "og:title", content: "Internal SIH Admin — Students" },
       { property: "og:description", content: "Manage registered student accounts for the Internal SIH." },
     ],
   }),
@@ -55,7 +55,7 @@ function StudentsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Students" description="Every account registered on the JGI-SIH portal, with server-verified controls." icon={Users} />
+      <PageHeader title="Students" description="Every account registered on the Internal SIH portal, with server-verified controls." icon={Users} />
 
       <input
         className="field max-w-md"

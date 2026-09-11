@@ -25,16 +25,16 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — JGI-SIH | JSPM Group Internal SIH Portal" },
+      { title: "Dashboard — Internal SIH | Internal SIH Portal" },
       {
         name: "description",
         content:
-          "Track your Internal SIH team status, AI proposal score, similarity risk and selection stage in the JSPM Group Internal SIH Portal.",
+          "Track your Internal SIH team status, AI proposal score, similarity risk and selection stage in the Internal SIH Portal.",
       },
-      { property: "og:title", content: "JGI-SIH Dashboard — JSPM Group Internal SIH Portal" },
+      { property: "og:title", content: "Internal SIH Dashboard — Internal SIH Portal" },
       {
         property: "og:description",
-        content: "AI-powered Internal Smart India Hackathon management and evaluation platform for JSPM Group campuses.",
+        content: "AI-powered Internal Smart India Hackathon management and evaluation platform for participating institutions.",
       },
     ],
   }),
@@ -385,7 +385,7 @@ function AdminDashboard() {
     <div className="space-y-6">
       <PageHeader
         title="Admin dashboard"
-        description="Internal SIH 2026 across four JSPM Group campuses — registrations, evaluation progress and result publication."
+        description="Internal SIH 2026 across all participating campuses — registrations, evaluation progress and result publication."
         icon={Trophy}
         actions={
           <>

@@ -13,14 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export const Route = createFileRoute("/_authenticated/team-registration")({
   head: () => ({
     meta: [
-      { title: "Team Registration — JGI-SIH Portal" },
+      { title: "Team Registration — Internal SIH Platform" },
       {
         name: "description",
         content:
           "Register your Internal SIH team: add 4-6 members, choose a campus and department, and get an auto-generated registration ID.",
       },
-      { property: "og:title", content: "Team Registration — JGI-SIH Portal" },
-      { property: "og:description", content: "Register a team for the JSPM Group Internal Smart India Hackathon 2026." },
+      { property: "og:title", content: "Team Registration — Internal SIH Platform" },
+      { property: "og:description", content: "Register a team for the Internal Smart India Hackathon 2026." },
     ],
   }),
   component: TeamRegistration,
@@ -153,7 +153,7 @@ function TeamRegistration() {
     <div className="space-y-6">
       <PageHeader
         title="Team registration"
-        description="Register your team for JSPM Group Internal SIH 2026. Team membership is locked once registration is submitted."
+        description="Register your team for Internal SIH 2026. Team membership is locked once registration is submitted."
         icon={UserPlus}
         actions={<DemoBadge />}
       />
@@ -298,7 +298,7 @@ function TeamRegistration() {
           <div className="surface-card p-5">
             <h2 className="font-display text-sm font-semibold">Before you submit</h2>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>• Team membership is <strong className="text-foreground">locked</strong> after registration — this mirrors the actual JSPM process.</li>
+              <li>• Team membership is <strong className="text-foreground">locked</strong> after registration — this mirrors the standard Internal SIH process.</li>
               <li>• Your Team ID and Registration Number are generated automatically.</li>
               <li>• A problem statement can be selected now or later from Problem Explorer.</li>
               <li>• Proposal submission unlocks after registration is complete.</li>

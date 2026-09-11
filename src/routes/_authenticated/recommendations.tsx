@@ -11,12 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export const Route = createFileRoute("/_authenticated/recommendations")({
   head: () => ({
     meta: [
-      { title: "AI Problem Recommendations — JGI-SIH Portal" },
+      { title: "AI Problem Recommendations — Internal SIH Platform" },
       {
         name: "description",
         content: "Get SIH problem statements matched to your team's skills, interests and preferred difficulty, with a match percentage and reasoning.",
       },
-      { property: "og:title", content: "AI Problem Recommendations — JGI-SIH Portal" },
+      { property: "og:title", content: "AI Problem Recommendations — Internal SIH Platform" },
       { property: "og:description", content: "Skill-based problem statement recommendations for Internal SIH teams." },
     ],
   }),

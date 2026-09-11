@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/results")({
   head: () => ({
     meta: [
-      { title: "Submission Result — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Submission Result — Internal SIH | Internal SIH" },
       { name: "description", content: "View your Internal SIH 2026 submission result, final score and panel remarks." },
-      { property: "og:title", content: "JGI-SIH Submission Results" },
-      { property: "og:description", content: "Final Internal Smart India Hackathon results for JSPM Group teams." },
+      { property: "og:title", content: "Internal SIH Submission Results" },
+      { property: "og:description", content: "Final Internal Smart India Hackathon results across participating institutions." },
     ],
   }),
   component: ResultsPage,

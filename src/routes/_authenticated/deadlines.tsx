@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/deadlines")({
   head: () => ({
     meta: [
-      { title: "Deadlines — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Deadlines — Internal SIH | Internal SIH" },
       { name: "description", content: "Key dates for Internal SIH 2026: registration, proposal submission, review, shortlist and presentation." },
-      { property: "og:title", content: "JGI-SIH Deadlines" },
+      { property: "og:title", content: "Internal SIH Deadlines" },
       { property: "og:description", content: "Every important Internal Smart India Hackathon date in one timeline." },
     ],
   }),
@@ -40,7 +40,7 @@ function DeadlinesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Deadlines" description="The official Internal SIH 2026 timeline across all JSPM Group campuses." icon={CalendarClock} />
+      <PageHeader title="Deadlines" description="The official Internal SIH 2026 timeline across all participating campuses." icon={CalendarClock} />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading timeline…</p>

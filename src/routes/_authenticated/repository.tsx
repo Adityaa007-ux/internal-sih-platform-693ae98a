@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/repository")({
   head: () => ({
     meta: [
-      { title: "SIH 2025 Repository — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "SIH 2025 Repository — Internal SIH | Internal SIH" },
       {
         name: "description",
         content:

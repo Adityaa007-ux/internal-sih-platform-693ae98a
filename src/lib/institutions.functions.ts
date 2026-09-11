@@ -62,6 +62,23 @@ export const lookupInstitutionByEmail = createServerFn({ method: "POST" })
     return { recognized: Boolean(institution), domain, institution, campuses, institutions };
   });
 
+/** Type-ahead search across every registered institution in India. */
+export const searchInstitutions = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ q: z.string().trim().max(120) }).parse(data))
+  .handler(async ({ data }): Promise<InstitutionOption[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let query = supabaseAdmin
+      .from("institutions")
+      .select("id, official_name, short_name, city, state")
+      .eq("status", "active");
+    if (data.q) {
+      const term = `%${data.q.replace(/[%_]/g, "")}%`;
+      query = query.or(`official_name.ilike.${term},short_name.ilike.${term},city.ilike.${term},state.ilike.${term}`);
+    }
+    const { data: rows } = await query.order("short_name").limit(25);
+    return (rows ?? []) as InstitutionOption[];
+  });
+
 export const listCampuses = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ institutionId: z.string().uuid() }).parse(data))
   .handler(async ({ data }): Promise<CampusOption[]> => {

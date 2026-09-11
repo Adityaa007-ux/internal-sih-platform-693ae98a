@@ -15,13 +15,13 @@ interface Msg {
 const GREETING: Msg = {
   id: "greet",
   role: "ai",
-  text: "Namaste! I'm the **JGI-SIH AI Assistant**.\n\nI can help you pick a problem statement, strengthen your proposal, understand AI scores and similarity risk, and explain how Internal SIH selection works. Tap a quick action or ask me anything.",
+  text: "Namaste! I'm the **Internal SIH AI Assistant**.\n\nI can help you pick a problem statement, strengthen your proposal, understand AI scores and similarity risk, and explain how Internal SIH selection works. Tap a quick action or ask me anything.",
 };
 
 const QUICK_ACTIONS = [
   { icon: CalendarClock, label: "Important Deadlines", prompt: "What are the important deadlines for Internal SIH 2026 and where can I see them?" },
   { icon: Users, label: "Mentors & Faculty", prompt: "How do mentors and faculty support teams in the Internal SIH process?" },
-  { icon: Sparkles, label: "AI Features", prompt: "Explain the AI features available in the JGI-SIH portal." },
+  { icon: Sparkles, label: "AI Features", prompt: "Explain the AI features available in the Internal SIH portal." },
   { icon: Info, label: "SIH Information", prompt: "Give me an overview of the Smart India Hackathon and this internal round." },
   { icon: HelpCircle, label: "Portal Help", prompt: "How do I navigate the portal and complete each stage?" },
   { icon: FileCheck2, label: "Submission Guidelines", prompt: "What are the proposal submission guidelines and what should each section contain?" },
@@ -87,7 +87,7 @@ export function AiAssistant() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close JGI-SIH AI Assistant" : "Open JGI-SIH AI Assistant"}
+        aria-label={open ? "Close Internal SIH AI Assistant" : "Open Internal SIH AI Assistant"}
         aria-expanded={open}
         className="fixed bottom-5 right-5 z-[60] flex size-13 items-center justify-center rounded-full brand-gradient text-primary-foreground shadow-pop transition-transform hover:scale-105 active:scale-95"
       >
@@ -101,7 +101,7 @@ export function AiAssistant() {
               <Bot className="size-5" />
             </span>
             <div className="min-w-0">
-              <p className="font-display text-sm font-semibold">JGI-SIH AI Assistant</p>
+              <p className="font-display text-sm font-semibold">Internal SIH AI Assistant</p>
               <p className="text-[11px] opacity-80">Always available · portal-aware</p>
             </div>
             <div className="ml-auto flex items-center gap-1">

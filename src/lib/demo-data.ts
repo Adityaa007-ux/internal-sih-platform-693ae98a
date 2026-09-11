@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// JGI-SIH — Demo / sample dataset.
+// Internal SIH — Demo / sample dataset.
 // All data here is clearly marked DEMO data and is used to make the prototype
 // fully interactive without a backend. Replace with real API reads later.
 // ---------------------------------------------------------------------------
@@ -351,7 +351,7 @@ function mkAi(
 export const DEMO_TEAMS: Team[] = [
   {
     id: "T-001",
-    regId: "JGI-SIH-2026-0001",
+    regId: "ISIH-2026-0001",
     name: "Team Innovexa",
     leader: "Aarav Deshmukh",
     email: "aarav.deshmukh@jspm.edu.in",
@@ -491,7 +491,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-002",
-    regId: "JGI-SIH-2026-0002",
+    regId: "ISIH-2026-0002",
     name: "Team CodeSankalp",
     leader: "Priya Naik",
     email: "priya.naik@jspm.edu.in",
@@ -602,7 +602,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-003",
-    regId: "JGI-SIH-2026-0003",
+    regId: "ISIH-2026-0003",
     name: "Team NeuralNexus",
     leader: "Siddharth Joshi",
     email: "siddharth.joshi@jspm.edu.in",
@@ -703,7 +703,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-004",
-    regId: "JGI-SIH-2026-0004",
+    regId: "ISIH-2026-0004",
     name: "Team AgriMinds",
     leader: "Rutuja Shinde",
     email: "rutuja.shinde@jspm.edu.in",
@@ -778,7 +778,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-005",
-    regId: "JGI-SIH-2026-0005",
+    regId: "ISIH-2026-0005",
     name: "Team ChainVerify",
     leader: "Manish Bhandari",
     email: "manish.bhandari@jspm.edu.in",
@@ -863,7 +863,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-006",
-    regId: "JGI-SIH-2026-0006",
+    regId: "ISIH-2026-0006",
     name: "Team UrbanFlow",
     leader: "Ananya Kulkarni",
     email: "ananya.kulkarni@jspm.edu.in",
@@ -962,7 +962,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-007",
-    regId: "JGI-SIH-2026-0007",
+    regId: "ISIH-2026-0007",
     name: "Team MediSync",
     leader: "Vaishnavi Patil",
     email: "vaishnavi.patil@jspm.edu.in",
@@ -1036,7 +1036,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-008",
-    regId: "JGI-SIH-2026-0008",
+    regId: "ISIH-2026-0008",
     name: "Team GreenGrid",
     leader: "Tejas Wankhede",
     email: "tejas.wankhede@jspm.edu.in",
@@ -1075,7 +1075,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-009",
-    regId: "JGI-SIH-2026-0009",
+    regId: "ISIH-2026-0009",
     name: "Team TrustEd",
     leader: "Nikhil Bagade",
     email: "nikhil.bagade@jspm.edu.in",
@@ -1149,7 +1149,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-010",
-    regId: "JGI-SIH-2026-0010",
+    regId: "ISIH-2026-0010",
     name: "Team KalaSetu",
     leader: "Shruti Kale",
     email: "shruti.kale@jspm.edu.in",
@@ -1188,7 +1188,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-011",
-    regId: "JGI-SIH-2026-0011",
+    regId: "ISIH-2026-0011",
     name: "Team RakshaNet",
     leader: "Aditya Kulkarni",
     email: "aditya.kulkarni@jspm.edu.in",
@@ -1256,7 +1256,7 @@ export const DEMO_TEAMS: Team[] = [
   },
   {
     id: "T-012",
-    regId: "JGI-SIH-2026-0012",
+    regId: "ISIH-2026-0012",
     name: "Team DrishtiPath",
     leader: "Sagar Dhumal",
     email: "sagar.dhumal@jspm.edu.in",
@@ -1386,7 +1386,7 @@ export const DEMO_ANNOUNCEMENTS: Announcement[] = [
   {
     id: "A-001",
     title: "Team registration is open",
-    body: "Registration for JSPM Group Internal SIH 2026 is now open across all four campuses. Teams must have 4 to 6 members. Team membership is locked once registration is submitted.",
+    body: "Registration for Internal SIH 2026 is now open across all four campuses. Teams must have 4 to 6 members. Team membership is locked once registration is submitted.",
     date: ts("2026-07-12T09:00:00"),
     type: "deadline",
     audience: "Students",

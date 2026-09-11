@@ -17,13 +17,13 @@ import { useSession } from "@/hooks/useSession";
 export const Route = createFileRoute("/_authenticated/approvals")({
   head: () => ({
     meta: [
-      { title: "Approvals — JGI-SIH | JSPM Group Internal SIH Portal" },
+      { title: "Approvals — Internal SIH | Internal SIH Portal" },
       {
         name: "description",
         content:
           "Faculty and administrators approve pending mentor and administrator accounts and review every team's selected SIH 2025 problem statement.",
       },
-      { property: "og:title", content: "JGI-SIH — Account Approvals" },
+      { property: "og:title", content: "Internal SIH — Account Approvals" },
       { property: "og:description", content: "Approve pending staff accounts and audit team problem-statement selections." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

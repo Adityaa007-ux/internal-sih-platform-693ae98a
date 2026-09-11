@@ -13,12 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 export const Route = createFileRoute("/_authenticated/proposal")({
   head: () => ({
     meta: [
-      { title: "Proposal Submission — JGI-SIH Portal" },
+      { title: "Proposal Submission — Internal SIH Platform" },
       {
         name: "description",
         content: "Draft and submit your Internal SIH proposal: solution, innovation, technical approach, impact and scalability.",
       },
-      { property: "og:title", content: "Proposal Submission — JGI-SIH Portal" },
+      { property: "og:title", content: "Proposal Submission — Internal SIH Platform" },
       { property: "og:description", content: "Submit your Internal Smart India Hackathon proposal for AI analysis and faculty review." },
     ],
   }),

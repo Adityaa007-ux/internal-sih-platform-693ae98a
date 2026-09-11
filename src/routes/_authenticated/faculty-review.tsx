@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/faculty-review")({
   head: () => ({
     meta: [
-      { title: "Faculty Review — JGI-SIH | JSPM Group Internal SIH" },
+      { title: "Faculty Review — Internal SIH | Internal SIH" },
       { name: "description", content: "Faculty evaluation workspace for Internal SIH 2026 proposals: score, comment and recommend teams." },
-      { property: "og:title", content: "JGI-SIH Faculty Review" },
+      { property: "og:title", content: "Internal SIH Faculty Review" },
       { property: "og:description", content: "Score and comment on Internal SIH proposals alongside AI signals." },
     ],
   }),

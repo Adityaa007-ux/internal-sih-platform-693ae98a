@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/similarity")({
   head: () => ({
     meta: [
-      { title: "AI Similarity Detection — JGI-SIH Portal" },
+      { title: "AI Similarity Detection — Internal SIH Platform" },
       {
         name: "description",
         content:
           "Detect duplicate or highly similar Internal SIH ideas with semantic similarity scoring, matching concept extraction and duplication risk classification.",
       },
-      { property: "og:title", content: "AI Similarity & Duplicate Detection — JGI-SIH Portal" },
+      { property: "og:title", content: "AI Similarity & Duplicate Detection — Internal SIH Platform" },
       { property: "og:description", content: "Semantic duplicate-idea detection helping faculty spot overlapping Internal SIH submissions." },
     ],
   }),

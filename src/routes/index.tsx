@@ -75,7 +75,11 @@ function landingFor(role: PortalRole): string {
 
 type Mode = "choose" | "login" | "signup";
 type SignupStep = "email" | "campus" | "otp" | "password" | "done";
-type LoginStep = "credentials" | "otp" | "forgot";
+type LoginStep = "credentials" | "otp" | "forgot" | "forgot-otp";
+
+function strongPassword(v: string): boolean {
+  return v.length >= 8 && /[A-Z]/.test(v) && /[a-z]/.test(v) && /\d/.test(v) && /[^A-Za-z0-9]/.test(v);
+}
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -96,6 +100,8 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loginOtp, setLoginOtp] = useState("");
+  const [instSearch, setInstSearch] = useState("");
+  const [instResults, setInstResults] = useState<InstitutionOption[]>([]);
 
   // signup
   const [step, setStep] = useState<SignupStep>("email");
@@ -191,16 +197,53 @@ function AuthPage() {
     }
   }
 
-  async function sendReset() {
-    if (busy) return;
+  async function sendResetOtp() {
+    if (busy || cooldown > 0) return;
     if (!email.trim()) { toast.error("Enter your registered email address."); return; }
     setBusy(true);
-    await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim().toLowerCase(),
+      options: { shouldCreateUser: false },
     });
     setBusy(false);
-    toast.success("If that email is registered, a password reset link is on its way.");
-    setLoginStep("credentials");
+    if (error) { toast.error(otpError(error.message)); return; }
+    setCooldown(45);
+    setLoginOtp("");
+    setNewPw("");
+    setConfirmPw("");
+    setLoginStep("forgot-otp");
+    toast.success("A 6-digit code has been emailed to you.");
+  }
+
+  async function confirmReset() {
+    if (busy) return;
+    if (newPw !== confirmPw) { toast.error("Passwords do not match."); return; }
+    if (!strongPassword(newPw)) {
+      toast.error(
+        "Password must be at least 8 characters with an uppercase letter, a lowercase letter, a number and a special character.",
+      );
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: loginOtp.trim(),
+        type: "email",
+      });
+      if (error) throw new Error("Incorrect or expired code. Please request a new one.");
+      const upd = await supabase.auth.updateUser({ password: newPw });
+      if (upd.error) throw new Error(upd.error.message);
+      await supabase.auth.signOut();
+      toast.success("Password updated. Please sign in with your new password.");
+      setLoginStep("credentials");
+      setPassword("");
+    } catch (e) {
+      await supabase.auth.signOut().catch(() => undefined);
+      err(e, "Could not reset your password.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   /* ---------------- signup ---------------- */
@@ -223,9 +266,21 @@ function AuthPage() {
     }
   }
 
+  async function runInstSearch(q: string) {
+    setInstSearch(q);
+    if (q.trim().length < 2) return setInstResults([]);
+    try {
+      setInstResults(await instSearchFn({ data: { q: q.trim() } }));
+    } catch {
+      setInstResults([]);
+    }
+  }
+
   async function pickInstitution(id: string) {
-    const inst = institutions.find((i) => i.id === id) ?? null;
+    const inst = [...institutions, ...instResults].find((i) => i.id === id) ?? null;
     setInstitution(inst);
+    setInstSearch(inst?.official_name ?? "");
+    setInstResults([]);
     setCampusId("");
     if (!inst) return setCampuses([]);
     const list = await campusesFor({ data: { institutionId: inst.id } });
@@ -492,7 +547,7 @@ function AuthPage() {
               <>
                 <h2 className="font-display text-xl font-bold">Forgot password</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  We'll email a secure, time-limited reset link to your registered address.
+                  We'll email a 6-digit verification code to your registered address.
                 </p>
                 <div className="mt-5 space-y-4">
                   <Field label="Email address" required>
@@ -503,15 +558,79 @@ function AuthPage() {
                       type="email"
                     />
                   </Field>
-                  <Button className="w-full" disabled={busy} onClick={() => void sendReset()}>
+                  <Button className="w-full" disabled={busy} onClick={() => void sendResetOtp()}>
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <MailCheck className="size-4" />}
-                    Send reset link
+                    Send verification code
                   </Button>
                   <button
                     className="w-full text-center text-xs font-medium text-primary"
                     onClick={() => setLoginStep("credentials")}
                   >
                     Back to login
+                  </button>
+                </div>
+              </>
+            )}
+
+            {mode === "login" && loginStep === "forgot-otp" && (
+              <>
+                <h2 className="font-display text-xl font-bold">Reset your password</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Enter the code sent to <span className="font-medium text-foreground">{email}</span> and choose a
+                  new password.
+                </p>
+                <div className="mt-5 space-y-4">
+                  <Field label="6-digit code" required>
+                    <input
+                      value={loginOtp}
+                      onChange={(e) => setLoginOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      inputMode="numeric"
+                      placeholder="______"
+                      className="field text-center text-lg tracking-[0.5em]"
+                    />
+                  </Field>
+                  <Field label="New password" required>
+                    <div className="relative">
+                      <input
+                        type={showPw ? "text" : "password"}
+                        value={newPw}
+                        onChange={(e) => setNewPw(e.target.value)}
+                        className="field pr-10"
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPw((s) => !s)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        aria-label={showPw ? "Hide password" : "Show password"}
+                      >
+                        {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </Field>
+                  <Field label="Confirm new password" required>
+                    <input
+                      type={showPw ? "text" : "password"}
+                      value={confirmPw}
+                      onChange={(e) => setConfirmPw(e.target.value)}
+                      className="field"
+                      autoComplete="new-password"
+                    />
+                  </Field>
+                  <p className="text-[11px] leading-relaxed text-muted-foreground">
+                    Minimum 8 characters with an uppercase letter, a lowercase letter, a number and a special
+                    character.
+                  </p>
+                  <Button className="w-full" disabled={busy} onClick={() => void confirmReset()}>
+                    {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+                    Set new password
+                  </Button>
+                  <button
+                    className="w-full text-center text-xs font-medium text-primary disabled:text-muted-foreground"
+                    disabled={cooldown > 0}
+                    onClick={() => void sendResetOtp()}
+                  >
+                    {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
                   </button>
                 </div>
               </>
@@ -603,22 +722,36 @@ function AuthPage() {
                   )}
                 </div>
                 <div className="mt-4 space-y-4">
-                  {!recognized && (
-                    <Field label="Institution" required>
-                      <select
-                        className="field"
-                        value={institution?.id ?? ""}
-                        onChange={(e) => void pickInstitution(e.target.value)}
-                      >
-                        <option value="">Select institution</option>
-                        {institutions.map((i) => (
-                          <option key={i.id} value={i.id}>
-                            {i.official_name}
-                          </option>
+                  <Field label="Institution" required>
+                    <input
+                      className="field"
+                      value={instSearch}
+                      onChange={(e) => void runInstSearch(e.target.value)}
+                      placeholder="Search your college, university, city or state…"
+                    />
+                    {instResults.length > 0 && (
+                      <div className="mt-1 max-h-44 overflow-y-auto rounded-lg border border-border">
+                        {instResults.map((i) => (
+                          <button
+                            key={i.id}
+                            type="button"
+                            onClick={() => void pickInstitution(i.id)}
+                            className="block w-full px-3 py-2 text-left text-xs hover:bg-secondary"
+                          >
+                            <span className="font-medium">{i.official_name}</span>
+                            <span className="block text-[10px] text-muted-foreground">
+                              {[i.city, i.state].filter(Boolean).join(", ")}
+                            </span>
+                          </button>
                         ))}
-                      </select>
-                    </Field>
-                  )}
+                      </div>
+                    )}
+                    {institution ? (
+                      <p className="mt-1.5 text-[11px] font-medium text-success">
+                        Selected: {institution.official_name}
+                      </p>
+                    ) : null}
+                  </Field>
                   <Field label="Campus" required>
                     <select className="field" value={campusId} onChange={(e) => setCampusId(e.target.value)}>
                       <option value="">Select campus</option>

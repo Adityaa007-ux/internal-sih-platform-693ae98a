@@ -25,6 +25,7 @@ import { loginWithPassword, finalizeRegistration, assertAccountActive, type Port
 import {
   lookupInstitutionByEmail,
   listCampuses,
+  searchInstitutions,
   type CampusOption,
   type InstitutionOption,
 } from "@/lib/institutions.functions";

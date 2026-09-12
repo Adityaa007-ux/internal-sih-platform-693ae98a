@@ -51,20 +51,22 @@ export async function runCycleMaintenance(): Promise<MaintenanceReport> {
   const teamIds = ((await supabaseAdmin.from("teams").select("id")).data ?? []).map((t) => t.id);
   const requestIds = ((await supabaseAdmin.from("mentorship_requests").select("id")).data ?? []).map((r) => r.id);
 
-  const wipe = async (table: string, column: string, ids: string[]) => {
-    if (!ids.length) return 0;
-    const { count } = await supabaseAdmin.from(table).delete({ count: "exact" }).in(column, ids);
-    return count ?? 0;
-  };
+  const count = (n: number | null) => n ?? 0;
 
-  report.removed["mentor_messages"] = await wipe("mentor_messages", "request_id", requestIds);
-  report.removed["mentorship_requests"] = requestIds.length
-    ? ((await supabaseAdmin.from("mentorship_requests").delete({ count: "exact" }).in("id", requestIds)).count ?? 0)
+  report.removed["mentor_messages"] = requestIds.length
+    ? count((await supabaseAdmin.from("mentor_messages").delete({ count: "exact" }).in("request_id", requestIds)).count)
     : 0;
-  report.removed["mentor_ratings"] = await wipe("mentor_ratings", "team_id", teamIds);
-  report.removed["team_members"] = await wipe("team_members", "team_id", teamIds);
+  report.removed["mentorship_requests"] = requestIds.length
+    ? count((await supabaseAdmin.from("mentorship_requests").delete({ count: "exact" }).in("id", requestIds)).count)
+    : 0;
+  report.removed["mentor_ratings"] = teamIds.length
+    ? count((await supabaseAdmin.from("mentor_ratings").delete({ count: "exact" }).in("team_id", teamIds)).count)
+    : 0;
+  report.removed["team_members"] = teamIds.length
+    ? count((await supabaseAdmin.from("team_members").delete({ count: "exact" }).in("team_id", teamIds)).count)
+    : 0;
   report.removed["teams"] = teamIds.length
-    ? ((await supabaseAdmin.from("teams").delete({ count: "exact" }).in("id", teamIds)).count ?? 0)
+    ? count((await supabaseAdmin.from("teams").delete({ count: "exact" }).in("id", teamIds)).count)
     : 0;
 
   await supabaseAdmin.from("audit_log").insert({

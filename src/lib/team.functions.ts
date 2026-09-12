@@ -16,10 +16,24 @@ export interface TeamRecord {
   created_at: string;
 }
 
+export interface TeamMemberRow {
+  user_id: string;
+  member_name: string;
+  is_leader: boolean;
+  gender: string | null;
+  prn: string | null;
+  email: string | null;
+  mobile: string | null;
+  department: string | null;
+  year: string | null;
+}
+
 export interface MyTeamResult {
-  team: TeamRecord | null;
+  team: (TeamRecord & { finalized?: boolean; process_completed?: boolean }) | null;
   isLeader: boolean;
-  members: { user_id: string; member_name: string; is_leader: boolean }[];
+  members: TeamMemberRow[];
+  collegeMentor: string | null;
+  industrialMentor: string | null;
 }
 
 /** The signed-in student's team, with the persisted problem-statement selection. */

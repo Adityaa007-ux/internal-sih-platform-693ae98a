@@ -53,17 +53,46 @@ export const getMyTeam = createServerFn({ method: "GET" })
       const { data: owned } = await supabase.from("teams").select("id").eq("leader_id", userId).limit(1).maybeSingle();
       teamId = owned?.id ?? null;
     }
-    if (!teamId) return { team: null, isLeader: false, members: [] };
+    const empty: MyTeamResult = {
+      team: null,
+      isLeader: false,
+      members: [],
+      collegeMentor: null,
+      industrialMentor: null,
+    };
+    if (!teamId) return empty;
 
     const [{ data: team }, { data: members }] = await Promise.all([
       supabase.from("teams").select("*").eq("id", teamId).maybeSingle(),
-      supabase.from("team_members").select("user_id, member_name, is_leader").eq("team_id", teamId),
+      supabase
+        .from("team_members")
+        .select("user_id, member_name, is_leader, gender, prn, email, mobile, department, year")
+        .eq("team_id", teamId)
+        .order("is_leader", { ascending: false }),
     ]);
-    if (!team) return { team: null, isLeader: false, members: [] };
+    if (!team) return empty;
+
+    let collegeMentor: string | null = null;
+    let industrialMentor: string | null = null;
+    if (team.assigned_mentor_id) {
+      const { data: m } = await supabase.from("mentors").select("name").eq("id", team.assigned_mentor_id).maybeSingle();
+      collegeMentor = m?.name ?? null;
+    }
+    if (team.industrial_mentor_user_id) {
+      const { data: im } = await supabase
+        .from("industrial_mentor_profiles")
+        .select("full_name, company")
+        .eq("user_id", team.industrial_mentor_user_id)
+        .maybeSingle();
+      industrialMentor = im ? `${im.full_name} · ${im.company}` : null;
+    }
+
     return {
-      team: team as TeamRecord,
+      team: team as MyTeamResult["team"],
       isLeader: team.leader_id === userId,
-      members: members ?? [],
+      members: (members ?? []) as TeamMemberRow[],
+      collegeMentor,
+      industrialMentor,
     };
   });
 

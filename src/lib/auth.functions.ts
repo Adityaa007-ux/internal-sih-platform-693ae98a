@@ -67,7 +67,7 @@ export const startEmailOtp = createServerFn({ method: "POST" })
     if (insert.error || !insert.data) throw new Error("Could not start email verification.");
     const send = data.purpose === "reset"
       ? await supabaseAdmin.auth.admin.generateLink({ type: "recovery", email })
-      : await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email, options: { data: { verification_code: code, otp_purpose: data.purpose } });
+      : await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email, options: { data: { verification_code: code, otp_purpose: data.purpose } } });
     if (send.error) throw new Error("Could not deliver the verification code. Please try again.");
     return { challengeId: insert.data.id, maskedEmail: maskEmail(email), maskedMobile: "", expiresAt, cooldownSeconds: RESEND_COOLDOWN_SECONDS };
   });

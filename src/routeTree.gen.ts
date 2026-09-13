@@ -17,6 +17,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAnalyzerRouteImport } from './routes/_authenticated/analyzer'
 import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authenticated/announcements'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated/approvals'
+import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDeadlinesRouteImport } from './routes/_authenticated/deadlines'
 import { Route as AuthenticatedFacultyReviewRouteImport } from './routes/_authenticated/faculty-review'
@@ -36,6 +37,7 @@ import { Route as AuthenticatedSimilarityRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSubmissionsRouteImport } from './routes/_authenticated/submissions'
 import { Route as AuthenticatedTeamRegistrationRouteImport } from './routes/_authenticated/team-registration'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminCyclesRouteImport } from './routes/_authenticated/admin/cycles'
 import { Route as AuthenticatedAdminStudentsRouteImport } from './routes/_authenticated/admin/students'
 import { Route as ApiPublicHooksCycleSyncRouteImport } from './routes/api/public/hooks/cycle-sync'
 
@@ -79,6 +81,12 @@ const AuthenticatedApprovalsRoute = AuthenticatedApprovalsRouteImport.update({
   path: '/approvals',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCertificatesRoute =
+  AuthenticatedCertificatesRouteImport.update({
+    id: '/certificates',
+    path: '/certificates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -180,6 +188,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminCyclesRoute =
+  AuthenticatedAdminCyclesRouteImport.update({
+    id: '/cycles',
+    path: '/cycles',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminStudentsRoute =
   AuthenticatedAdminStudentsRouteImport.update({
     id: '/students',
@@ -200,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/analyzer': typeof AuthenticatedAnalyzerRoute
   '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/faculty-review': typeof AuthenticatedFacultyReviewRoute
@@ -218,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/similarity': typeof AuthenticatedSimilarityRoute
   '/submissions': typeof AuthenticatedSubmissionsRoute
   '/team-registration': typeof AuthenticatedTeamRegistrationRoute
+  '/admin/cycles': typeof AuthenticatedAdminCyclesRoute
   '/admin/students': typeof AuthenticatedAdminStudentsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/cycle-sync': typeof ApiPublicHooksCycleSyncRoute
@@ -229,6 +245,7 @@ export interface FileRoutesByTo {
   '/analyzer': typeof AuthenticatedAnalyzerRoute
   '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deadlines': typeof AuthenticatedDeadlinesRoute
   '/faculty-review': typeof AuthenticatedFacultyReviewRoute
@@ -247,6 +264,7 @@ export interface FileRoutesByTo {
   '/similarity': typeof AuthenticatedSimilarityRoute
   '/submissions': typeof AuthenticatedSubmissionsRoute
   '/team-registration': typeof AuthenticatedTeamRegistrationRoute
+  '/admin/cycles': typeof AuthenticatedAdminCyclesRoute
   '/admin/students': typeof AuthenticatedAdminStudentsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/cycle-sync': typeof ApiPublicHooksCycleSyncRoute
@@ -261,6 +279,7 @@ export interface FileRoutesById {
   '/_authenticated/analyzer': typeof AuthenticatedAnalyzerRoute
   '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
+  '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/deadlines': typeof AuthenticatedDeadlinesRoute
   '/_authenticated/faculty-review': typeof AuthenticatedFacultyReviewRoute
@@ -279,6 +298,7 @@ export interface FileRoutesById {
   '/_authenticated/similarity': typeof AuthenticatedSimilarityRoute
   '/_authenticated/submissions': typeof AuthenticatedSubmissionsRoute
   '/_authenticated/team-registration': typeof AuthenticatedTeamRegistrationRoute
+  '/_authenticated/admin/cycles': typeof AuthenticatedAdminCyclesRoute
   '/_authenticated/admin/students': typeof AuthenticatedAdminStudentsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/cycle-sync': typeof ApiPublicHooksCycleSyncRoute
@@ -293,6 +313,7 @@ export interface FileRouteTypes {
     | '/analyzer'
     | '/announcements'
     | '/approvals'
+    | '/certificates'
     | '/dashboard'
     | '/deadlines'
     | '/faculty-review'
@@ -311,6 +332,7 @@ export interface FileRouteTypes {
     | '/similarity'
     | '/submissions'
     | '/team-registration'
+    | '/admin/cycles'
     | '/admin/students'
     | '/admin/'
     | '/api/public/hooks/cycle-sync'
@@ -322,6 +344,7 @@ export interface FileRouteTypes {
     | '/analyzer'
     | '/announcements'
     | '/approvals'
+    | '/certificates'
     | '/dashboard'
     | '/deadlines'
     | '/faculty-review'
@@ -340,6 +363,7 @@ export interface FileRouteTypes {
     | '/similarity'
     | '/submissions'
     | '/team-registration'
+    | '/admin/cycles'
     | '/admin/students'
     | '/admin'
     | '/api/public/hooks/cycle-sync'
@@ -353,6 +377,7 @@ export interface FileRouteTypes {
     | '/_authenticated/analyzer'
     | '/_authenticated/announcements'
     | '/_authenticated/approvals'
+    | '/_authenticated/certificates'
     | '/_authenticated/dashboard'
     | '/_authenticated/deadlines'
     | '/_authenticated/faculty-review'
@@ -371,6 +396,7 @@ export interface FileRouteTypes {
     | '/_authenticated/similarity'
     | '/_authenticated/submissions'
     | '/_authenticated/team-registration'
+    | '/_authenticated/admin/cycles'
     | '/_authenticated/admin/students'
     | '/_authenticated/admin/'
     | '/api/public/hooks/cycle-sync'
@@ -439,6 +465,13 @@ declare module '@tanstack/react-router' {
       path: '/approvals'
       fullPath: '/approvals'
       preLoaderRoute: typeof AuthenticatedApprovalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/certificates': {
+      id: '/_authenticated/certificates'
+      path: '/certificates'
+      fullPath: '/certificates'
+      preLoaderRoute: typeof AuthenticatedCertificatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -574,6 +607,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/cycles': {
+      id: '/_authenticated/admin/cycles'
+      path: '/cycles'
+      fullPath: '/admin/cycles'
+      preLoaderRoute: typeof AuthenticatedAdminCyclesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/students': {
       id: '/_authenticated/admin/students'
       path: '/students'
@@ -592,12 +632,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminCyclesRoute: typeof AuthenticatedAdminCyclesRoute
   AuthenticatedAdminStudentsRoute: typeof AuthenticatedAdminStudentsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminCyclesRoute: AuthenticatedAdminCyclesRoute,
     AuthenticatedAdminStudentsRoute: AuthenticatedAdminStudentsRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   }
@@ -613,6 +655,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyzerRoute: typeof AuthenticatedAnalyzerRoute
   AuthenticatedAnnouncementsRoute: typeof AuthenticatedAnnouncementsRoute
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
+  AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDeadlinesRoute: typeof AuthenticatedDeadlinesRoute
   AuthenticatedFacultyReviewRoute: typeof AuthenticatedFacultyReviewRoute
@@ -639,6 +682,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyzerRoute: AuthenticatedAnalyzerRoute,
   AuthenticatedAnnouncementsRoute: AuthenticatedAnnouncementsRoute,
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
+  AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDeadlinesRoute: AuthenticatedDeadlinesRoute,
   AuthenticatedFacultyReviewRoute: AuthenticatedFacultyReviewRoute,

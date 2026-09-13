@@ -132,7 +132,6 @@ function AuthPage() {
   const [humanAnswer, setHumanAnswer] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const [challengeId, setChallengeId] = useState("");
-  const [emailOtpChallengeId, setEmailOtpChallengeId] = useState("");
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {

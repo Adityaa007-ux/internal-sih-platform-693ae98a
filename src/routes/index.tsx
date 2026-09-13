@@ -101,8 +101,6 @@ function AuthPage() {
   const campusesFor = useServerFn(listCampuses);
   const instSearchFn = useServerFn(searchInstitutions);
   const humanChallenge = useServerFn(newHumanChallenge);
-  const startEmailCode = useServerFn(startEmailOtp);
-  const verifyEmailCode = useServerFn(verifyEmailOtp);
 
   const [role, setRole] = useState<PortalRole | null>(null);
   const [mode, setMode] = useState<Mode>("choose");
@@ -177,22 +175,21 @@ function AuthPage() {
     if (busy || cooldown > 0) return;
     if (!email.trim()) { toast.error("Enter your registered email address."); return; }
     setBusy(true);
-    try {
-      const result = await startEmailCode({ data: { email, purpose: "login" } });
-      setEmailOtpChallengeId(result.challengeId);
-      setCooldown(result.cooldownSeconds);
-      setLoginStep("otp");
-      toast.success("A 6-digit code has been emailed to you.");
-    } catch (e) { err(e, "Could not send the verification code."); } finally { setBusy(false); }
+    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false } });
+    setBusy(false);
+    if (error) { toast.error(otpError(error.message)); return; }
+    setCooldown(30);
+    setLoginStep("otp");
+    toast.success("A 6-digit code has been emailed to you.");
   }
 
   async function verifyLoginOtp() {
     if (busy) return;
     setBusy(true);
     try {
-      if (!emailOtpChallengeId) throw new Error("Please request a new code.");
-      await verifyEmailCode({ data: { challengeId: emailOtpChallengeId, code: loginOtp.trim(), purpose: "login" } });
-      const loginResult = await login({ data: { role: role ?? "student", identifier: email.trim(), password: "" } }).catch(() => null);
+      if (!/^\d{6}$/.test(loginOtp.trim())) throw new Error("Enter the 6-digit verification code.");
+      const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: loginOtp.trim(), type: "email" });
+      if (error) throw new Error("Incorrect or expired code. Please try again.");
       const info = await gate({});
       if (!info.registered) {
         await supabase.auth.signOut();
@@ -212,13 +209,12 @@ function AuthPage() {
     if (busy || cooldown > 0) return;
     if (!email.trim()) { toast.error("Enter your registered email address."); return; }
     setBusy(true);
-    try {
-      const result = await startEmailCode({ data: { email, purpose: "reset" } });
-      setEmailOtpChallengeId(result.challengeId);
-      setCooldown(result.cooldownSeconds);
-      setLoginOtp(""); setNewPw(""); setConfirmPw(""); setLoginStep("forgot-otp");
-      toast.success("A 6-digit code has been emailed to you.");
-    } catch (e) { err(e, "Could not send the verification code."); } finally { setBusy(false); }
+    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false } });
+    setBusy(false);
+    if (error) { toast.error(otpError(error.message)); return; }
+    setCooldown(30);
+    setLoginOtp(""); setNewPw(""); setConfirmPw(""); setLoginStep("forgot-otp");
+    toast.success("A 6-digit code has been emailed to you.");
   }
 
   async function confirmReset() {
@@ -232,11 +228,13 @@ function AuthPage() {
     }
     setBusy(true);
     try {
-      if (!emailOtpChallengeId) throw new Error("Please request a new code.");
-      await verifyEmailCode({ data: { challengeId: emailOtpChallengeId, code: loginOtp.trim(), purpose: "reset" } });
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      void supabaseAdmin;
-      throw new Error("Password reset requires the recovery session from the verified email.");
+      if (!/^\d{6}$/.test(loginOtp.trim())) throw new Error("Enter the 6-digit verification code.");
+      const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: loginOtp.trim(), type: "email" });
+      if (error) throw new Error("Incorrect or expired code. Please request a new one.");
+      const upd = await supabase.auth.updateUser({ password: newPw });
+      if (upd.error) throw new Error(upd.error.message);
+      await supabase.auth.signOut();
+      toast.success("Password updated. Please sign in with your new password.");
       setLoginStep("credentials");
       setPassword("");
     } catch (e) {

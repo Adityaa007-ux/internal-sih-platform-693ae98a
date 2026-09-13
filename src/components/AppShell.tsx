@@ -11,6 +11,7 @@ import {
   CalendarClock,
   CheckCircle2,
   ClipboardList,
+  Award,
   FileSearch,
   FileText,
   GitCompareArrows,
@@ -68,6 +69,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { to: "/repository", label: "SIH 2025 Repository", icon: Database, roles: ["student", "faculty", "mentor", "admin"] },
       { to: "/proposal", label: "Proposal Submission", icon: FileText, roles: ["student"] },
       { to: "/industrial-mentor", label: "Industrial Mentor", icon: Briefcase, roles: ["student"] },
+      { to: "/certificates", label: "Feedback & Certificate", icon: Award, roles: ["student"] },
       { to: "/mentor-hub", label: "Industrial Mentor Hub", icon: Briefcase, roles: ["mentor", "faculty", "admin"] },
     ],
   },
@@ -95,6 +97,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { to: "/approvals", label: "Account Approvals", icon: BadgeCheck, roles: ["faculty", "admin"] },
       { to: "/admin", label: "Admin Dashboard", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/students", label: "Manage Students", icon: Users, roles: ["admin"] },
+      { to: "/admin/cycles", label: "SIH Cycle Calendar", icon: CalendarClock, roles: ["admin", "faculty"] },
     ],
   },
   {
@@ -243,7 +246,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="border-t border-sidebar-border p-3">
         <div className="rounded-xl bg-sidebar-accent/60 p-3">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">Event</p>
-          <p className="mt-0.5 font-display text-sm font-semibold">Internal SIH 2026</p>
+          <p className="mt-0.5 font-display text-sm font-semibold">Internal SIH Cycle</p>
           <p className="mt-1 text-[11px] text-sidebar-foreground/60">
             {currentTeam ? `${currentTeam.name} · ${currentTeam.regId}` : "No team linked"}
           </p>

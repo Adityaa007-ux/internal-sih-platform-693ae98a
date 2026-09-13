@@ -38,6 +38,55 @@ export interface StartOtpResult {
   cooldownSeconds: number;
 }
 
+const emailOtpSchema = z.object({
+  email: z.string().trim().max(160),
+  purpose: z.enum(["login", "reset"]),
+});
+
+const verifyEmailOtpSchema = verifySchema.extend({
+  purpose: z.enum(["login", "reset"]),
+});
+
+export const startEmailOtp = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => emailOtpSchema.parse(data))
+  .handler(async ({ data }): Promise<StartOtpResult> => {
+    const { isEmail, normalizeEmail, generateOtp, hashOtp, OTP_TTL_MINUTES, RESEND_COOLDOWN_SECONDS } = await import("./auth.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = normalizeEmail(data.email);
+    if (!isEmail(email)) throw new Error("Enter a valid email address.");
+    const { data: profile } = await supabaseAdmin.from("profiles").select("id, mobile").eq("email", email).maybeSingle();
+    if (!profile) throw new Error("No account was found for this email address.");
+    const { data: recent } = await supabaseAdmin.from("otp_challenges").select("created_at").eq("contact", email).eq("consumed", false).eq("purpose", data.purpose).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (recent) {
+      const age = (Date.now() - new Date(recent.created_at).getTime()) / 1000;
+      if (age < RESEND_COOLDOWN_SECONDS) throw new Error(`Please wait ${Math.ceil(RESEND_COOLDOWN_SECONDS - age)}s before requesting a new code.`);
+    }
+    const code = generateOtp();
+    const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60_000).toISOString();
+    const insert = await supabaseAdmin.from("otp_challenges").insert({ channel: "email", contact: email, purpose: data.purpose, email, mobile: profile.mobile, code_hash: await hashOtp(code, email), expires_at: expiresAt }).select("id").single();
+    if (insert.error || !insert.data) throw new Error("Could not start email verification.");
+    const send = await supabaseAdmin.auth.admin.generateLink({ type: data.purpose === "reset" ? "recovery" : "magiclink", email, options: { data: { verification_code: code, otp_purpose: data.purpose } } });
+    if (send.error) throw new Error("Could not deliver the verification code. Please try again.");
+    return { challengeId: insert.data.id, maskedEmail: maskEmail(email), maskedMobile: "", expiresAt, cooldownSeconds: RESEND_COOLDOWN_SECONDS };
+  });
+
+export const verifyEmailOtp = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => verifyEmailOtpSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { hashOtp, OTP_MAX_ATTEMPTS } = await import("./auth.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: challenge } = await supabaseAdmin.from("otp_challenges").select("*").eq("id", data.challengeId).eq("purpose", data.purpose).maybeSingle();
+    if (!challenge || challenge.consumed) throw new Error("This code is no longer valid. Please request a new one.");
+    if (new Date(challenge.expires_at).getTime() < Date.now()) throw new Error("This code has expired. Please request a new one.");
+    if (challenge.attempts >= OTP_MAX_ATTEMPTS) throw new Error("Too many incorrect attempts. Please request a new code.");
+    if ((await hashOtp(data.code, challenge.contact)) !== challenge.code_hash) {
+      await supabaseAdmin.from("otp_challenges").update({ attempts: challenge.attempts + 1 }).eq("id", challenge.id);
+      throw new Error("Incorrect verification code.");
+    }
+    await supabaseAdmin.from("otp_challenges").update({ consumed: true, verified_at: new Date().toISOString() }).eq("id", challenge.id);
+    return { ok: true, email: challenge.contact };
+  });
+
 function maskEmail(contact: string): string {
   const [user = "", domain = ""] = contact.split("@");
   return `${user.slice(0, 2)}${"•".repeat(Math.max(1, user.length - 2))}@${domain}`;

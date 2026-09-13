@@ -7,7 +7,15 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/public/hooks/cycle-sync")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const expected = process.env["CYCLE_SYNC_SECRET"];
+        const provided = request.headers.get("x-cycle-sync-secret");
+        if (!expected || provided !== expected) {
+          return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
         const { runCycleMaintenance } = await import("@/lib/cycle-maintenance.server");
         try {
           const report = await runCycleMaintenance();

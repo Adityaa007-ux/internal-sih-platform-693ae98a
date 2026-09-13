@@ -127,7 +127,7 @@ function StudentDashboard() {
       <div className="space-y-6">
         <PageHeader
           title={`Welcome, ${user.name.split(" ")[0]}`}
-          description="You have not registered a team for Internal SIH 2026 yet."
+          description="You have not registered a team for the current Internal SIH cycle yet."
           icon={LayoutDashboard}
         />
         <EmptyState
@@ -150,7 +150,7 @@ function StudentDashboard() {
     <div className="space-y-6">
       <PageHeader
         title={`Welcome back, ${user.name.split(" ")[0]}`}
-        description={`${currentTeam.name} · ${currentTeam.campus} · Internal SIH 2026`}
+        description={`${currentTeam.name} · ${currentTeam.campus} · Current Internal SIH cycle`}
         icon={LayoutDashboard}
         actions={
           <>
@@ -385,7 +385,7 @@ function AdminDashboard() {
     <div className="space-y-6">
       <PageHeader
         title="Admin dashboard"
-        description="Internal SIH 2026 across all participating campuses — registrations, evaluation progress and result publication."
+        description="Current Internal SIH activity across participating campuses — registrations, evaluation progress and result publication."
         icon={Trophy}
         actions={
           <>

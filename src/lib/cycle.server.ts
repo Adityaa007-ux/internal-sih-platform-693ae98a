@@ -73,7 +73,7 @@ export function describeCycle(cycle: CycleRow | null): CycleStatus {
     phase === "waiting"
       ? `The Internal SIH cycle opens on ${activation} (one month before the official process starts on ${cycle.official_start}).`
       : phase === "active"
-        ? `Internal SIH ${cycle.edition_year} is active. The official process runs until ${cycle.official_end}.`
+          ? `The current Internal SIH cycle is active. The official process runs until ${cycle.official_end}.`
         : phase === "closure"
           ? `The official process has ended. Records stay available for closure tasks until ${closureEnd}.`
           : "The closure period has ended. Cycle data is being reset for the next edition.";

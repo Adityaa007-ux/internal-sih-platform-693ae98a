@@ -25,6 +25,8 @@ import {
   loginWithPassword,
   startSignupOtp,
   verifySignupOtp as verifySignupCode,
+  startEmailOtp,
+  verifyEmailOtp,
   completeSignup,
   assertAccountActive,
   type PortalRole,
@@ -172,13 +174,10 @@ function AuthPage() {
     if (busy || cooldown > 0) return;
     if (!email.trim()) { toast.error("Enter your registered email address."); return; }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { shouldCreateUser: false },
-    });
+    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false } });
     setBusy(false);
     if (error) { toast.error(otpError(error.message)); return; }
-    setCooldown(45);
+    setCooldown(30);
     setLoginStep("otp");
     toast.success("A 6-digit code has been emailed to you.");
   }
@@ -187,11 +186,8 @@ function AuthPage() {
     if (busy) return;
     setBusy(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: email.trim().toLowerCase(),
-        token: loginOtp.trim(),
-        type: "email",
-      });
+      if (!/^\d{6}$/.test(loginOtp.trim())) throw new Error("Enter the 6-digit verification code.");
+      const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: loginOtp.trim(), type: "email" });
       if (error) throw new Error("Incorrect or expired code. Please try again.");
       const info = await gate({});
       if (!info.registered) {
@@ -212,17 +208,11 @@ function AuthPage() {
     if (busy || cooldown > 0) return;
     if (!email.trim()) { toast.error("Enter your registered email address."); return; }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { shouldCreateUser: false },
-    });
+    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false } });
     setBusy(false);
     if (error) { toast.error(otpError(error.message)); return; }
-    setCooldown(45);
-    setLoginOtp("");
-    setNewPw("");
-    setConfirmPw("");
-    setLoginStep("forgot-otp");
+    setCooldown(30);
+    setLoginOtp(""); setNewPw(""); setConfirmPw(""); setLoginStep("forgot-otp");
     toast.success("A 6-digit code has been emailed to you.");
   }
 
@@ -237,11 +227,8 @@ function AuthPage() {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: email.trim().toLowerCase(),
-        token: loginOtp.trim(),
-        type: "email",
-      });
+      if (!/^\d{6}$/.test(loginOtp.trim())) throw new Error("Enter the 6-digit verification code.");
+      const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: loginOtp.trim(), type: "email" });
       if (error) throw new Error("Incorrect or expired code. Please request a new one.");
       const upd = await supabase.auth.updateUser({ password: newPw });
       if (upd.error) throw new Error(upd.error.message);

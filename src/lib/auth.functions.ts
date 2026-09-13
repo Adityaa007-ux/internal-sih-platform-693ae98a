@@ -34,8 +34,6 @@ export interface StartOtpResult {
   challengeId: string;
   maskedEmail: string;
   maskedMobile: string;
-  demo: boolean;
-  demoCode?: string;
   expiresAt: string;
   cooldownSeconds: number;
 }
@@ -46,7 +44,7 @@ function maskEmail(contact: string): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* Signup: step 1 — details + demo OTP                                  */
+/* Signup: step 1 — details + numeric email OTP                         */
 /* ------------------------------------------------------------------ */
 
 export const startSignupOtp = createServerFn({ method: "POST" })
@@ -58,7 +56,6 @@ export const startSignupOtp = createServerFn({ method: "POST" })
       normalizeEmail,
       normalizeMobile,
       normalizePrn,
-      isDemoDelivery,
       generateOtp,
       hashOtp,
       OTP_TTL_MINUTES,
@@ -111,12 +108,20 @@ export const startSignupOtp = createServerFn({ method: "POST" })
       .single();
     if (insert.error || !insert.data) throw new Error("Could not start verification. Please try again.");
 
+    const send = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+      options: { data: { verification_code: code } },
+    });
+    if (send.error) throw new Error("Could not deliver the verification code. Please try again.");
+
+    // The managed email template renders this numeric value as {{ .Data.verification_code }}.
+    // No login link is returned to the browser.
+
     return {
       challengeId: insert.data.id,
       maskedEmail: maskEmail(email),
       maskedMobile: `••••• ${mobile.slice(-4)}`,
-      demo: isDemoDelivery(),
-      demoCode: code,
       expiresAt,
       cooldownSeconds: RESEND_COOLDOWN_SECONDS,
     };

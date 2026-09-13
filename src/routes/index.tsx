@@ -21,7 +21,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { loginWithPassword, finalizeRegistration, assertAccountActive, type PortalRole } from "@/lib/auth.functions";
+import {
+  loginWithPassword,
+  startSignupOtp,
+  verifySignupOtp as verifySignupCode,
+  completeSignup,
+  assertAccountActive,
+  type PortalRole,
+} from "@/lib/auth.functions";
 import {
   lookupInstitutionByEmail,
   listCampuses,
@@ -84,7 +91,9 @@ function strongPassword(v: string): boolean {
 function AuthPage() {
   const navigate = useNavigate();
   const login = useServerFn(loginWithPassword);
-  const register = useServerFn(finalizeRegistration);
+  const startSignup = useServerFn(startSignupOtp);
+  const verifySignup = useServerFn(verifySignupCode);
+  const finishSignup = useServerFn(completeSignup);
   const gate = useServerFn(assertAccountActive);
   const lookup = useServerFn(lookupInstitutionByEmail);
   const campusesFor = useServerFn(listCampuses);
@@ -120,6 +129,7 @@ function AuthPage() {
   const [challenge, setChallenge] = useState<HumanChallenge | null>(null);
   const [humanAnswer, setHumanAnswer] = useState("");
   const [cooldown, setCooldown] = useState(0);
+  const [challengeId, setChallengeId] = useState("");
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
@@ -297,27 +307,27 @@ function AuthPage() {
     if (!institution) { toast.error("Select your institution."); return; }
     if (!campusId) { toast.error("Select your campus."); return; }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { shouldCreateUser: true },
-    });
-    setBusy(false);
-    if (error) { toast.error(otpError(error.message)); return; }
-    setCooldown(45);
-    setStep("otp");
-    toast.success("Verification code sent to your email.");
+    try {
+      const result = await startSignup({
+        data: { role: role ?? "student", fullName, email, mobile, prn: prn || undefined },
+      });
+      setChallengeId(result.challengeId);
+      setCooldown(result.cooldownSeconds);
+      setStep("otp");
+      toast.success("A 6-digit verification code was sent to your email.");
+    } catch (e) {
+      err(e, "Could not send the verification code.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function verifySignupOtp() {
     if (busy) return;
     setBusy(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: email.trim().toLowerCase(),
-        token: otp.trim(),
-        type: "email",
-      });
-      if (error) throw new Error("Incorrect or expired code. Please request a new one.");
+      if (!challengeId) throw new Error("Please request a new verification code.");
+      await verifySignup({ data: { challengeId, code: otp.trim() } });
       setChallenge(await humanChallenge());
       setHumanAnswer("");
       setStep("password");
@@ -330,21 +340,14 @@ function AuthPage() {
   }
 
   async function completeRegistration() {
-    if (busy || !role || !institution || !challenge) return;
+    if (busy || !role || !institution || !challenge || !challengeId) return;
     setBusy(true);
     try {
-      const res = await register({
+      const res = await finishSignup({
         data: {
-          role,
-          fullName: fullName.trim(),
-          institutionId: institution.id,
-          campusId,
-          prn: prn.trim() || undefined,
-          mobile: mobile.trim() || undefined,
+          challengeId,
           password: newPw,
           confirmPassword: confirmPw,
-          humanToken: challenge.token,
-          humanAnswer,
         },
       });
       await supabase.auth.signOut();

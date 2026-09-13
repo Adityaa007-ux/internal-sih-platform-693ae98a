@@ -37,16 +37,6 @@ export function validatePassword(value: string): string | null {
   return null;
 }
 
-/** Demo delivery: no real email/SMS provider is configured, so the OTP is shown on screen. */
-export function isDemoDelivery(): boolean {
-  return !(
-    process.env["RESEND_API_KEY"] ||
-    process.env["SENDGRID_API_KEY"] ||
-    process.env["TWILIO_AUTH_TOKEN"] ||
-    process.env["MSG91_AUTH_KEY"]
-  );
-}
-
 export function generateOtp(): string {
   const bytes = new Uint32Array(1);
   crypto.getRandomValues(bytes);

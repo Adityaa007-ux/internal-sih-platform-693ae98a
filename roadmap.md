@@ -9,3 +9,5 @@
 - [ ] Login/signup copy: "Educational Email ID", any valid domain accepted
 - [ ] Demo accounts (5 roles) + demo credential panel
 - [ ] End-to-end test + publish
+- [ ] Email verification: deliver manually entered six-digit numeric OTPs only, never login links
+- [ ] Demo credentials PDF: verified logins for student team, mentor, faculty, admin, and industrial mentor

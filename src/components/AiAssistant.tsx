@@ -19,7 +19,7 @@ const GREETING: Msg = {
 };
 
 const QUICK_ACTIONS = [
-  { icon: CalendarClock, label: "Important Deadlines", prompt: "What are the important deadlines for Internal SIH 2026 and where can I see them?" },
+  { icon: CalendarClock, label: "Important Deadlines", prompt: "What are the important deadlines for the current Internal SIH cycle and where can I see them?" },
   { icon: Users, label: "Mentors & Faculty", prompt: "How do mentors and faculty support teams in the Internal SIH process?" },
   { icon: Sparkles, label: "AI Features", prompt: "Explain the AI features available in the Internal SIH portal." },
   { icon: Info, label: "SIH Information", prompt: "Give me an overview of the Smart India Hackathon and this internal round." },

@@ -60,7 +60,7 @@ function MyTeam() {
               </span>
             ) : null}
             <Button asChild variant="outline">
-              <Link to="/certificate">
+              <Link to="/certificates">
                 <Award className="size-4" /> Certificate
               </Link>
             </Button>

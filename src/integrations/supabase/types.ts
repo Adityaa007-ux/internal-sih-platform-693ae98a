@@ -702,6 +702,36 @@ export type Database = {
         }
         Relationships: []
       }
+      security_questions: {
+        Row: {
+          answer_hash: string
+          created_at: string
+          email: string
+          id: string
+          position: number
+          question: string
+          user_id: string
+        }
+        Insert: {
+          answer_hash: string
+          created_at?: string
+          email: string
+          id?: string
+          position: number
+          question: string
+          user_id: string
+        }
+        Update: {
+          answer_hash?: string
+          created_at?: string
+          email?: string
+          id?: string
+          position?: number
+          question?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sih_cycles: {
         Row: {
           check_note: string

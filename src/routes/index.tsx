@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Bot,
@@ -12,7 +12,6 @@ import {
   GraduationCap,
   KeyRound,
   Loader2,
-  MailCheck,
   ShieldCheck,
   Sparkles,
   UserCog,
@@ -21,16 +20,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { loginWithPassword, type PortalRole } from "@/lib/auth.functions";
 import {
-  loginWithPassword,
-  startSignupOtp,
-  verifySignupOtp as verifySignupCode,
-  startEmailOtp,
-  verifyEmailOtp,
-  completeSignup,
-  assertAccountActive,
-  type PortalRole,
-} from "@/lib/auth.functions";
+  checkEmailAvailable,
+  registerAccount,
+  getSecurityQuestions,
+  resetPasswordWithAnswer,
+} from "@/lib/account.functions";
 import {
   lookupInstitutionByEmail,
   listCampuses,
@@ -38,7 +34,6 @@ import {
   type CampusOption,
   type InstitutionOption,
 } from "@/lib/institutions.functions";
-import { newHumanChallenge, type HumanChallenge } from "@/lib/human-check.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -83,8 +78,8 @@ function landingFor(role: PortalRole): string {
 }
 
 type Mode = "choose" | "login" | "signup";
-type SignupStep = "email" | "campus" | "otp" | "password" | "done";
-type LoginStep = "credentials" | "otp" | "forgot" | "forgot-otp";
+type SignupStep = "email" | "campus" | "security" | "password" | "done";
+type LoginStep = "credentials" | "forgot" | "forgot-answer";
 
 function strongPassword(v: string): boolean {
   return v.length >= 8 && /[A-Z]/.test(v) && /[a-z]/.test(v) && /\d/.test(v) && /[^A-Za-z0-9]/.test(v);
@@ -93,14 +88,13 @@ function strongPassword(v: string): boolean {
 function AuthPage() {
   const navigate = useNavigate();
   const login = useServerFn(loginWithPassword);
-  const startSignup = useServerFn(startSignupOtp);
-  const verifySignup = useServerFn(verifySignupCode);
-  const finishSignup = useServerFn(completeSignup);
-  const gate = useServerFn(assertAccountActive);
+  const checkEmail = useServerFn(checkEmailAvailable);
+  const register = useServerFn(registerAccount);
+  const fetchQuestions = useServerFn(getSecurityQuestions);
+  const resetPassword = useServerFn(resetPasswordWithAnswer);
   const lookup = useServerFn(lookupInstitutionByEmail);
   const campusesFor = useServerFn(listCampuses);
   const instSearchFn = useServerFn(searchInstitutions);
-  const humanChallenge = useServerFn(newHumanChallenge);
 
   const [role, setRole] = useState<PortalRole | null>(null);
   const [mode, setMode] = useState<Mode>("choose");
@@ -111,39 +105,45 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [loginOtp, setLoginOtp] = useState("");
-  const [instSearch, setInstSearch] = useState("");
-  const [instResults, setInstResults] = useState<InstitutionOption[]>([]);
+
+  // forgot password
+  const [questions, setQuestions] = useState<{ position: number; question: string }[]>([]);
+  const [pickedQuestion, setPickedQuestion] = useState(1);
+  const [answer, setAnswer] = useState("");
 
   // signup
   const [step, setStep] = useState<SignupStep>("email");
   const [institution, setInstitution] = useState<InstitutionOption | null>(null);
   const [institutions, setInstitutions] = useState<InstitutionOption[]>([]);
   const [recognized, setRecognized] = useState(true);
+  const [instSearch, setInstSearch] = useState("");
+  const [instResults, setInstResults] = useState<InstitutionOption[]>([]);
   const [campuses, setCampuses] = useState<CampusOption[]>([]);
+  const [campusSearch, setCampusSearch] = useState("");
   const [campusId, setCampusId] = useState("");
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
   const [prn, setPrn] = useState("");
-  const [otp, setOtp] = useState("");
+  const [q1, setQ1] = useState("");
+  const [a1, setA1] = useState("");
+  const [q2, setQ2] = useState("");
+  const [a2, setA2] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
-  const [challenge, setChallenge] = useState<HumanChallenge | null>(null);
-  const [humanAnswer, setHumanAnswer] = useState("");
-  const [cooldown, setCooldown] = useState(0);
-  const [challengeId, setChallengeId] = useState("");
+
+  const visibleCampuses = useMemo(() => {
+    const q = campusSearch.trim().toLowerCase();
+    if (!q) return campuses;
+    return campuses.filter(
+      (c) => c.campus_name.toLowerCase().includes(q) || (c.city ?? "").toLowerCase().includes(q),
+    );
+  }, [campuses, campusSearch]);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
       if (data.session) void navigate({ to: "/dashboard" });
     });
   }, [navigate]);
-
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
 
   function err(e: unknown, fallback: string) {
     toast.error(e instanceof Error && e.message ? e.message : fallback);
@@ -170,55 +170,34 @@ function AuthPage() {
     }
   }
 
-  async function sendLoginOtp() {
-    if (busy || cooldown > 0) return;
-    if (!email.trim()) { toast.error("Enter your registered email address."); return; }
-    setBusy(true);
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false } });
-    setBusy(false);
-    if (error) { toast.error(otpError(error.message)); return; }
-    setCooldown(30);
-    setLoginStep("otp");
-    toast.success("A 6-digit code has been emailed to you.");
-  }
-
-  async function verifyLoginOtp() {
+  async function loadQuestions() {
     if (busy) return;
+    if (!email.trim()) {
+      toast.error("Enter your registered email address.");
+      return;
+    }
     setBusy(true);
     try {
-      if (!/^\d{6}$/.test(loginOtp.trim())) throw new Error("Enter the 6-digit verification code.");
-      const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: loginOtp.trim(), type: "email" });
-      if (error) throw new Error("Incorrect or expired code. Please try again.");
-      const info = await gate({});
-      if (!info.registered) {
-        await supabase.auth.signOut();
-        throw new Error("Please complete your registration first.");
-      }
-      toast.success(`Welcome back, ${info.fullName || "there"}.`);
-      await navigate({ to: landingFor(info.role) });
+      const res = await fetchQuestions({ data: { email: email.trim().toLowerCase() } });
+      setQuestions(res.questions);
+      setPickedQuestion(res.questions[0]?.position ?? 1);
+      setAnswer("");
+      setNewPw("");
+      setConfirmPw("");
+      setLoginStep("forgot-answer");
     } catch (e) {
-      await supabase.auth.signOut().catch(() => undefined);
-      err(e, "Could not verify the code.");
+      err(e, "We could not load your security questions.");
     } finally {
       setBusy(false);
     }
   }
 
-  async function sendResetOtp() {
-    if (busy || cooldown > 0) return;
-    if (!email.trim()) { toast.error("Enter your registered email address."); return; }
-    setBusy(true);
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false } });
-    setBusy(false);
-    if (error) { toast.error(otpError(error.message)); return; }
-    setCooldown(30);
-    setLoginOtp(""); setNewPw(""); setConfirmPw(""); setLoginStep("forgot-otp");
-    toast.success("A 6-digit code has been emailed to you.");
-  }
-
   async function confirmReset() {
     if (busy) return;
-    if (newPw !== confirmPw) { toast.error("Passwords do not match."); return; }
+    if (newPw !== confirmPw) {
+      toast.error("Passwords do not match.");
+      return;
+    }
     if (!strongPassword(newPw)) {
       toast.error(
         "Password must be at least 8 characters with an uppercase letter, a lowercase letter, a number and a special character.",
@@ -227,17 +206,19 @@ function AuthPage() {
     }
     setBusy(true);
     try {
-      if (!/^\d{6}$/.test(loginOtp.trim())) throw new Error("Enter the 6-digit verification code.");
-      const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: loginOtp.trim(), type: "email" });
-      if (error) throw new Error("Incorrect or expired code. Please request a new one.");
-      const upd = await supabase.auth.updateUser({ password: newPw });
-      if (upd.error) throw new Error(upd.error.message);
-      await supabase.auth.signOut();
+      await resetPassword({
+        data: {
+          email: email.trim().toLowerCase(),
+          position: pickedQuestion,
+          answer,
+          password: newPw,
+          confirmPassword: confirmPw,
+        },
+      });
       toast.success("Password updated. Please sign in with your new password.");
       setLoginStep("credentials");
       setPassword("");
     } catch (e) {
-      await supabase.auth.signOut().catch(() => undefined);
       err(e, "Could not reset your password.");
     } finally {
       setBusy(false);
@@ -250,12 +231,14 @@ function AuthPage() {
     if (busy) return;
     setBusy(true);
     try {
+      await checkEmail({ data: { email: email.trim().toLowerCase() } });
       const res = await lookup({ data: { email: email.trim().toLowerCase() } });
       setInstitutions(res.institutions);
       setRecognized(res.recognized);
       setInstitution(res.institution);
       setCampuses(res.campuses);
-      setCampusId(res.campuses[0]?.id ?? "");
+      setCampusId("");
+      setCampusSearch("");
       setInstSearch(res.institution?.official_name ?? "");
       setInstResults([]);
       setStep("campus");
@@ -282,71 +265,50 @@ function AuthPage() {
     setInstSearch(inst?.official_name ?? "");
     setInstResults([]);
     setCampusId("");
+    setCampusSearch("");
     if (!inst) return setCampuses([]);
-    const list = await campusesFor({ data: { institutionId: inst.id } });
-    setCampuses(list);
-    setCampusId(list[0]?.id ?? "");
+    setCampuses(await campusesFor({ data: { institutionId: inst.id } }));
   }
 
-  async function sendSignupOtp() {
-    if (busy || cooldown > 0) return;
-    if (fullName.trim().length < 3) { toast.error("Enter your full name."); return; }
-    if (!institution) { toast.error("Select your institution."); return; }
-    if (!campusId) { toast.error("Select your campus."); return; }
-    setBusy(true);
-    try {
-      const result = await startSignup({
-        data: { role: role ?? "student", fullName, email, mobile, prn: prn || undefined },
-      });
-      setChallengeId(result.challengeId);
-      setCooldown(result.cooldownSeconds);
-      setStep("otp");
-      toast.success("A 6-digit verification code was sent to your email.");
-    } catch (e) {
-      err(e, "Could not send the verification code.");
-    } finally {
-      setBusy(false);
-    }
+  function goToSecurity() {
+    if (fullName.trim().length < 3) return toast.error("Enter your full name.");
+    if (!institution) return toast.error("Select your institution.");
+    if (!campusId) return toast.error("Select your campus.");
+    setStep("security");
   }
 
-  async function verifySignupOtp() {
-    if (busy) return;
-    setBusy(true);
-    try {
-      if (!challengeId) throw new Error("Please request a new verification code.");
-      await verifySignup({ data: { challengeId, code: otp.trim() } });
-      setChallenge(await humanChallenge());
-      setHumanAnswer("");
-      setStep("password");
-      toast.success("Email verified ✓");
-    } catch (e) {
-      err(e, "Could not verify the code.");
-    } finally {
-      setBusy(false);
-    }
+  function goToPassword() {
+    if (q1.trim().length < 8 || a1.trim().length < 2) return toast.error("Complete security question 1.");
+    if (q2.trim().length < 8 || a2.trim().length < 2) return toast.error("Complete security question 2.");
+    if (q1.trim().toLowerCase() === q2.trim().toLowerCase())
+      return toast.error("Your two security questions must be different.");
+    setStep("password");
   }
 
   async function completeRegistration() {
-    if (busy || !role || !institution || !challenge || !challengeId) return;
+    if (busy || !role || !institution) return;
     setBusy(true);
     try {
-      const res = await finishSignup({
+      await register({
         data: {
-          challengeId,
+          role,
+          email: email.trim().toLowerCase(),
+          fullName,
+          mobile: mobile || undefined,
+          prn: prn || undefined,
+          institutionId: institution.id,
+          campusId,
           password: newPw,
           confirmPassword: confirmPw,
+          questions: [
+            { question: q1.trim(), answer: a1 },
+            { question: q2.trim(), answer: a2 },
+          ],
         },
       });
-      await supabase.auth.signOut();
       setStep("done");
-      toast.success(
-        res.approvalStatus === "pending"
-          ? "Registration successful — your account is awaiting approval."
-          : "Registration successful. Please sign in.",
-      );
+      toast.success("Account created. Please sign in with your email and password.");
     } catch (e) {
-      setChallenge(await humanChallenge().catch(() => null));
-      setHumanAnswer("");
       err(e, "Could not complete registration.");
     } finally {
       setBusy(false);
@@ -360,7 +322,6 @@ function AuthPage() {
     setPassword("");
     setNewPw("");
     setConfirmPw("");
-    setOtp("");
   }
 
   /* ---------------- render ---------------- */
@@ -392,7 +353,7 @@ function AuthPage() {
               { icon: BrainCircuit, t: "AI Proposal Analyzer with section-wise scoring" },
               { icon: Sparkles, t: "Idea similarity & duplication detection" },
               { icon: Bot, t: "24×7 AI Assistant for student guidance" },
-              { icon: ShieldCheck, t: "Verified email sign up with role-based access" },
+              { icon: ShieldCheck, t: "Role-based access with self-set security questions" },
             ].map(({ icon: Icon, t }) => (
               <li key={t} className="flex items-center gap-3">
                 <span className="flex size-8 items-center justify-center rounded-lg bg-white/15">
@@ -485,7 +446,7 @@ function AuthPage() {
                     void doLogin();
                   }}
                 >
-                  <Field label="Email address" required>
+                  <Field label="Registered email ID" required>
                     <input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -519,12 +480,9 @@ function AuthPage() {
                     Login
                   </Button>
                 </form>
-                <div className="mt-4 flex items-center justify-between text-xs">
+                <div className="mt-4 text-center text-xs">
                   <button className="font-medium text-primary" onClick={() => setLoginStep("forgot")}>
                     Forgot password?
-                  </button>
-                  <button className="font-medium text-primary" onClick={() => void sendLoginOtp()}>
-                    Login with OTP
                   </button>
                 </div>
                 <p className="mt-4 text-center text-xs text-muted-foreground">
@@ -540,20 +498,16 @@ function AuthPage() {
               <>
                 <h2 className="font-display text-xl font-bold">Forgot password</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  We'll email a 6-digit verification code to your registered address.
+                  Enter your registered email ID. You will answer one of the two security questions you set when
+                  you signed up.
                 </p>
                 <div className="mt-5 space-y-4">
-                  <Field label="Email address" required>
-                    <input
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="field"
-                      type="email"
-                    />
+                  <Field label="Registered email ID" required>
+                    <input value={email} onChange={(e) => setEmail(e.target.value)} className="field" type="email" />
                   </Field>
-                  <Button className="w-full" disabled={busy} onClick={() => void sendResetOtp()}>
-                    {busy ? <Loader2 className="size-4 animate-spin" /> : <MailCheck className="size-4" />}
-                    Send verification code
+                  <Button className="w-full" disabled={busy} onClick={() => void loadQuestions()}>
+                    {busy ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+                    Continue
                   </Button>
                   <button
                     className="w-full text-center text-xs font-medium text-primary"
@@ -565,22 +519,28 @@ function AuthPage() {
               </>
             )}
 
-            {mode === "login" && loginStep === "forgot-otp" && (
+            {mode === "login" && loginStep === "forgot-answer" && (
               <>
-                <h2 className="font-display text-xl font-bold">Reset your password</h2>
+                <h2 className="font-display text-xl font-bold">Answer a security question</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Enter the code sent to <span className="font-medium text-foreground">{email}</span> and choose a
-                  new password.
+                  Answer one of your own questions and set a new password.
                 </p>
                 <div className="mt-5 space-y-4">
-                  <Field label="6-digit code" required>
-                    <input
-                      value={loginOtp}
-                      onChange={(e) => setLoginOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      inputMode="numeric"
-                      placeholder="______"
-                      className="field text-center text-lg tracking-[0.5em]"
-                    />
+                  <Field label="Choose a question" required>
+                    <select
+                      className="field"
+                      value={pickedQuestion}
+                      onChange={(e) => setPickedQuestion(Number(e.target.value))}
+                    >
+                      {questions.map((q) => (
+                        <option key={q.position} value={q.position}>
+                          {q.question}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Your answer" required>
+                    <input value={answer} onChange={(e) => setAnswer(e.target.value)} className="field" />
                   </Field>
                   <Field label="New password" required>
                     <div className="relative">
@@ -618,44 +578,6 @@ function AuthPage() {
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
                     Set new password
                   </Button>
-                  <button
-                    className="w-full text-center text-xs font-medium text-primary disabled:text-muted-foreground"
-                    disabled={cooldown > 0}
-                    onClick={() => void sendResetOtp()}
-                  >
-                    {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {mode === "login" && loginStep === "otp" && (
-              <>
-                <h2 className="font-display text-xl font-bold">Login with OTP</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  We've sent a verification code to <span className="font-medium text-foreground">{email}</span>
-                </p>
-                <div className="mt-5 space-y-4">
-                  <Field label="6-digit code" required>
-                    <input
-                      value={loginOtp}
-                      onChange={(e) => setLoginOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      inputMode="numeric"
-                      placeholder="______"
-                      className="field text-center text-lg tracking-[0.5em]"
-                    />
-                  </Field>
-                  <Button className="w-full" disabled={busy} onClick={() => void verifyLoginOtp()}>
-                    {busy ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
-                    Verify OTP
-                  </Button>
-                  <button
-                    className="w-full text-center text-xs font-medium text-primary disabled:text-muted-foreground"
-                    disabled={cooldown > 0}
-                    onClick={() => void sendLoginOtp()}
-                  >
-                    {cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
-                  </button>
                 </div>
               </>
             )}
@@ -664,7 +586,8 @@ function AuthPage() {
               <>
                 <h2 className="font-display text-xl font-bold">Sign up as {role ? ROLE_LABEL[role] : ""}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Enter your college / institutional email address. We'll identify your institution from it.
+                  Enter your educational email ID (any valid, existing email works). It must not already be
+                  registered.
                 </p>
                 <form
                   className="mt-5 space-y-4"
@@ -673,7 +596,7 @@ function AuthPage() {
                     void doLookup();
                   }}
                 >
-                  <Field label="College / institutional email address" required>
+                  <Field label="Educational email ID / registered email" required>
                     <input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -699,23 +622,20 @@ function AuthPage() {
 
             {mode === "signup" && step === "campus" && (
               <>
-                <h2 className="font-display text-xl font-bold">Select your campus</h2>
+                <h2 className="font-display text-xl font-bold">Your university & campus</h2>
                 <div className="mt-3 flex items-start gap-2 rounded-lg bg-secondary px-3 py-2.5 text-xs text-muted-foreground">
                   <Building2 className="mt-0.5 size-4 shrink-0" />
                   {recognized && institution ? (
                     <span>
-                      Institution identified from your email domain:{" "}
+                      Institution identified from your email:{" "}
                       <span className="font-semibold text-foreground">{institution.official_name}</span>
                     </span>
                   ) : (
-                    <span>
-                      We couldn't match your email domain to a participating institution. Choose your institution
-                      below — staff will verify it before your account is activated.
-                    </span>
+                    <span>Search for your university or college, then pick the campus you study or work at.</span>
                   )}
                 </div>
                 <div className="mt-4 space-y-4">
-                  <Field label="Institution" required>
+                  <Field label="University / college" required>
                     <input
                       className="field"
                       value={instSearch}
@@ -745,16 +665,39 @@ function AuthPage() {
                       </p>
                     ) : null}
                   </Field>
+
                   <Field label="Campus" required>
-                    <select className="field" value={campusId} onChange={(e) => setCampusId(e.target.value)}>
-                      <option value="">Select campus</option>
-                      {campuses.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.campus_name}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      className="field"
+                      value={campusSearch}
+                      onChange={(e) => setCampusSearch(e.target.value)}
+                      placeholder={institution ? "Search campuses…" : "Select a university first"}
+                      disabled={!institution}
+                    />
+                    <div className="mt-1 max-h-44 overflow-y-auto rounded-lg border border-border">
+                      {visibleCampuses.length === 0 ? (
+                        <p className="px-3 py-3 text-xs text-muted-foreground">
+                          {institution ? "No campuses match your search." : "Choose your university above."}
+                        </p>
+                      ) : (
+                        visibleCampuses.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setCampusId(c.id)}
+                            className={cn(
+                              "block w-full px-3 py-2 text-left text-xs hover:bg-secondary",
+                              campusId === c.id && "bg-primary-soft text-primary",
+                            )}
+                          >
+                            <span className="font-medium">{c.campus_name}</span>
+                            {c.city ? <span className="block text-[10px] text-muted-foreground">{c.city}</span> : null}
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </Field>
+
                   <Field label="Full name" required>
                     <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="field" />
                   </Field>
@@ -773,41 +716,49 @@ function AuthPage() {
                       </Field>
                     )}
                   </div>
-                  <Button className="w-full" disabled={busy} onClick={() => void sendSignupOtp()}>
-                    {busy ? <Loader2 className="size-4 animate-spin" /> : <MailCheck className="size-4" />}
-                    Send verification code
+                  <Button className="w-full" onClick={goToSecurity}>
+                    Continue
                   </Button>
                 </div>
               </>
             )}
 
-            {mode === "signup" && step === "otp" && (
+            {mode === "signup" && step === "security" && (
               <>
-                <h2 className="font-display text-xl font-bold">Verify your email</h2>
+                <h2 className="font-display text-xl font-bold">Set your security questions</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  We've sent a verification code to <span className="font-medium text-foreground">{email}</span>
+                  Write two questions and answers of your own choice. If you forget your password, answering one of
+                  them lets you set a new one.
                 </p>
                 <div className="mt-5 space-y-4">
-                  <Field label="6-digit code" required>
+                  <Field label="Security question 1" required>
                     <input
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      inputMode="numeric"
-                      placeholder="______"
-                      className="field text-center text-lg tracking-[0.5em]"
+                      className="field"
+                      value={q1}
+                      onChange={(e) => setQ1(e.target.value)}
+                      placeholder="e.g. What was my first school's name?"
+                      maxLength={160}
                     />
                   </Field>
-                  <Button className="w-full" disabled={busy} onClick={() => void verifySignupOtp()}>
-                    {busy ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
-                    Verify OTP
+                  <Field label="Answer 1" required>
+                    <input className="field" value={a1} onChange={(e) => setA1(e.target.value)} maxLength={120} />
+                  </Field>
+                  <Field label="Security question 2" required>
+                    <input
+                      className="field"
+                      value={q2}
+                      onChange={(e) => setQ2(e.target.value)}
+                      placeholder="e.g. What is my favourite sport?"
+                      maxLength={160}
+                    />
+                  </Field>
+                  <Field label="Answer 2" required>
+                    <input className="field" value={a2} onChange={(e) => setA2(e.target.value)} maxLength={120} />
+                  </Field>
+                  <p className="text-[11px] text-muted-foreground">Answers are not case sensitive.</p>
+                  <Button className="w-full" onClick={goToPassword}>
+                    Continue
                   </Button>
-                  <button
-                    className="w-full text-center text-xs font-medium text-primary disabled:text-muted-foreground"
-                    disabled={cooldown > 0}
-                    onClick={() => void sendSignupOtp()}
-                  >
-                    {cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
-                  </button>
                 </div>
               </>
             )}
@@ -815,7 +766,9 @@ function AuthPage() {
             {mode === "signup" && step === "password" && (
               <>
                 <h2 className="font-display text-xl font-bold">Create your password</h2>
-                <p className="mt-1 text-sm text-success">Email verified ✓</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  This is the password you will use with <span className="font-medium text-foreground">{email}</span>.
+                </p>
                 <div className="mt-5 space-y-4">
                   <Field label="Create password" required>
                     <div className="relative">
@@ -849,15 +802,6 @@ function AuthPage() {
                     Minimum 8 characters with an uppercase letter, a lowercase letter, a number and a special
                     character.
                   </p>
-                  <Field label={`Human verification — ${challenge?.question ?? "loading…"}`} required>
-                    <input
-                      value={humanAnswer}
-                      onChange={(e) => setHumanAnswer(e.target.value)}
-                      className="field"
-                      inputMode="numeric"
-                      placeholder="Your answer"
-                    />
-                  </Field>
                   <Button className="w-full" disabled={busy} onClick={() => void completeRegistration()}>
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
                     Create account
@@ -874,7 +818,7 @@ function AuthPage() {
                 <h2 className="mt-4 font-display text-xl font-bold">Registration successful</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {role === "student"
-                    ? "Your account is ready. Please sign in to open your dashboard."
+                    ? "Your account is ready. Please sign in with your email ID and password."
                     : "Your account has been created and is awaiting approval by an authorised approver."}
                 </p>
                 <Button className="mt-5 w-full" onClick={backToLogin}>
@@ -887,13 +831,6 @@ function AuthPage() {
       </section>
     </main>
   );
-}
-
-function otpError(message: string): string {
-  if (/rate|limit|seconds/i.test(message)) return "Too many requests. Please wait a minute and try again.";
-  if (/signups not allowed|not found|User not found/i.test(message))
-    return "No account found for this email. Please sign up first.";
-  return "Could not send the verification code. Please check the email address and try again.";
 }
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {

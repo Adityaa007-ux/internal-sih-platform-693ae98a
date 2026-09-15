@@ -1,0 +1,87 @@
+import type { Role } from "@/lib/demo-data";
+
+/**
+ * Single source of truth for what each role may open.
+ * Anything not listed for a role is blocked in the navigation AND in the shell.
+ */
+export const ROLE_ROUTES: Record<Role, string[]> = {
+  student: [
+    "/dashboard",
+    "/team-registration",
+    "/my-team",
+    "/problems",
+    "/repository",
+    "/proposal",
+    "/industrial-mentor",
+    "/certificates",
+    "/analyzer",
+    "/similarity",
+    "/recommendations",
+    "/presentation",
+    "/results",
+    "/announcements",
+    "/deadlines",
+    "/settings",
+    "/sessions",
+  ],
+  mentor: [
+    "/dashboard",
+    "/mentor-hub",
+    "/submissions",
+    "/problems",
+    "/repository",
+    "/analyzer",
+    "/similarity",
+    "/recommendations",
+    "/announcements",
+    "/deadlines",
+    "/settings",
+    "/sessions",
+  ],
+  faculty: [
+    "/dashboard",
+    "/submissions",
+    "/faculty-review",
+    "/shortlist",
+    "/presentation",
+    "/results",
+    "/approvals",
+    "/admin/cycles",
+    "/analytics",
+    "/mentor-hub",
+    "/problems",
+    "/repository",
+    "/analyzer",
+    "/similarity",
+    "/announcements",
+    "/deadlines",
+    "/settings",
+    "/sessions",
+  ],
+  admin: [
+    "/dashboard",
+    "/admin",
+    "/admin/students",
+    "/admin/cycles",
+    "/approvals",
+    "/analytics",
+    "/submissions",
+    "/faculty-review",
+    "/shortlist",
+    "/presentation",
+    "/results",
+    "/mentor-hub",
+    "/problems",
+    "/repository",
+    "/analyzer",
+    "/similarity",
+    "/announcements",
+    "/deadlines",
+    "/settings",
+    "/sessions",
+  ],
+};
+
+export function canAccess(role: Role, pathname: string): boolean {
+  return ROLE_ROUTES[role].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}

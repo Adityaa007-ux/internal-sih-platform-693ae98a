@@ -270,18 +270,35 @@ function AuthPage() {
     setCampuses(await campusesFor({ data: { institutionId: inst.id } }));
   }
 
-  function goToSecurity() {
-    if (fullName.trim().length < 3) return toast.error("Enter your full name.");
-    if (!institution) return toast.error("Select your institution.");
-    if (!campusId) return toast.error("Select your campus.");
+  function goToSecurity(): void {
+    if (fullName.trim().length < 3) {
+      toast.error("Enter your full name.");
+      return;
+    }
+    if (!institution) {
+      toast.error("Select your institution.");
+      return;
+    }
+    if (!campusId) {
+      toast.error("Select your campus.");
+      return;
+    }
     setStep("security");
   }
 
-  function goToPassword() {
-    if (q1.trim().length < 8 || a1.trim().length < 2) return toast.error("Complete security question 1.");
-    if (q2.trim().length < 8 || a2.trim().length < 2) return toast.error("Complete security question 2.");
-    if (q1.trim().toLowerCase() === q2.trim().toLowerCase())
-      return toast.error("Your two security questions must be different.");
+  function goToPassword(): void {
+    if (q1.trim().length < 8 || a1.trim().length < 2) {
+      toast.error("Complete security question 1.");
+      return;
+    }
+    if (q2.trim().length < 8 || a2.trim().length < 2) {
+      toast.error("Complete security question 2.");
+      return;
+    }
+    if (q1.trim().toLowerCase() === q2.trim().toLowerCase()) {
+      toast.error("Your two security questions must be different.");
+      return;
+    }
     setStep("password");
   }
 

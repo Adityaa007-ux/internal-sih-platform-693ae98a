@@ -13,8 +13,10 @@ import {
   type Team,
   type TeamStage,
 } from "./demo-data";
+import { demoTeamIdFor, normaliseEmail } from "./demo-access";
+import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "jgi-sih-demo-state-v1";
+const STORAGE_KEY = "isih-workspace-v2";
 
 export interface NotificationItem {
   id: string;
@@ -71,11 +73,22 @@ const stageRank: Record<TeamStage, number> = {
 const advance = (current: TeamStage, next: TeamStage): TeamStage =>
   stageRank[next] > stageRank[current] ? next : current;
 
-function initialState(): PersistedState {
+function blankState(): PersistedState {
+  return {
+    role: "student",
+    teams: [],
+    currentTeamId: null,
+    announcements: [],
+    notifications: [],
+    resultsPublished: false,
+  };
+}
+
+function demoState(teamId: string): PersistedState {
   return {
     role: "student",
     teams: DEMO_TEAMS,
-    currentTeamId: "T-001",
+    currentTeamId: teamId,
     announcements: DEMO_ANNOUNCEMENTS,
     notifications: DEMO_ANNOUNCEMENTS.slice(0, 4).map((a, i) => ({
       id: `N-${a.id}`,
@@ -88,28 +101,49 @@ function initialState(): PersistedState {
   };
 }
 
+function initialState(): PersistedState {
+  return blankState();
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<PersistedState>(initialState);
   const [hydrated, setHydrated] = useState(false);
+  const [storageKey, setStorageKey] = useState<string | null>(null);
 
+  // The workspace is per-account. Demo content only exists for the fixed demo
+  // addresses; every other account starts completely blank.
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setState({ ...initialState(), ...(JSON.parse(raw) as PersistedState) });
-    } catch {
-      /* ignore corrupt demo state */
-    }
-    setHydrated(true);
+    let active = true;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      const email = normaliseEmail(data.session?.user?.email);
+      const demoTeam = demoTeamIdFor(email);
+      const key = `${STORAGE_KEY}:${email || "guest"}`;
+      const base = demoTeam ? demoState(demoTeam) : blankState();
+      let next = base;
+      try {
+        const raw = window.localStorage.getItem(key);
+        if (raw) next = { ...base, ...(JSON.parse(raw) as PersistedState) };
+      } catch {
+        /* ignore corrupt local state */
+      }
+      setState(next);
+      setStorageKey(key);
+      setHydrated(true);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !storageKey) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
     } catch {
       /* storage full / unavailable */
     }
-  }, [state, hydrated]);
+  }, [state, hydrated, storageKey]);
 
   const patchTeam = useCallback((id: string, fn: (t: Team) => Team) => {
     setState((s) => ({ ...s, teams: s.teams.map((t) => (t.id === id ? fn(t) : t)) }));

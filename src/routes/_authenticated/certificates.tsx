@@ -54,7 +54,13 @@ function CertificatesPage() {
           await qc.invalidateQueries({ queryKey: ["certificate-state"] });
         }} />)}
       </div>
-      {state.data.certificate ? <CertificateCard certificate={state.data.certificate} /> : state.data.eligible ? <Button onClick={() => issueMutation.mutate()} disabled={issueMutation.isPending}><Award className="size-4" />{issueMutation.isPending ? "Issuing…" : "Issue my certificate"}</Button> : null}
+      {state.data.certificate ? <CertificateCard certificate={state.data.certificate} /> : <>
+        {state.data.eligible ? <Button onClick={() => issueMutation.mutate()} disabled={issueMutation.isPending}><Award className="size-4" />{issueMutation.isPending ? "Issuing…" : "Issue my certificate"}</Button> : null}
+        <section className="space-y-3">
+          <div><h2 className="font-display font-semibold">Sample certificate</h2><p className="text-sm text-muted-foreground">This is only a preview so you know what you will receive. Your real certificate carries your own name and a unique ID.</p></div>
+          <CertificateCard demo certificate={{ certificate_id: "ISIH-DEMO-CERTIFICATE", student_name: "Your Name Here", team_name: "Your Team Name", institution: "Your Institution", ps_title: "Your selected problem statement" }} />
+        </section>
+      </>}
     </> : null}
   </div>;
 }
@@ -74,8 +80,11 @@ function RatingForm({ target, onSave }: { target: RatingTarget; onSave: (values:
 
 type RatingValues = { overall: number; guidance: number; availability: number; technical: number; communication: number; helpfulness: number; feedback: string };
 
-function CertificateCard({ certificate }: { certificate: NonNullable<Awaited<ReturnType<typeof getCertificateState>>["certificate"]> }) {
-  return <section className="certificate-sheet border-4 border-double border-primary bg-card p-8 text-center print:border-foreground">
+type CertificateView = { certificate_id: string; student_name: string; team_name: string; institution: string; ps_title?: string | null };
+
+function CertificateCard({ certificate, demo = false }: { certificate: CertificateView; demo?: boolean }) {
+  return <section className="certificate-sheet relative border-4 border-double border-primary bg-card p-8 text-center print:border-foreground">
+    {demo ? <span className="absolute right-4 top-4 rounded-full bg-warning-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-warning">Demo certificate — not valid</span> : null}
     <p className="text-xs font-semibold uppercase tracking-widest text-primary">Internal SIH Platform</p><h2 className="mt-4 font-display text-3xl font-bold">Certificate of Participation</h2>
     <p className="mt-6 text-sm text-muted-foreground">This certifies that</p><p className="mt-2 font-display text-2xl font-bold">{certificate.student_name}</p>
     <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">participated in the Internal Smart India Hackathon as a member of <strong className="text-foreground">{certificate.team_name}</strong>{certificate.ps_title ? `, working on “${certificate.ps_title}”.` : "."}</p>

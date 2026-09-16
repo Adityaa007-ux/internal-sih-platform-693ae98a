@@ -13,8 +13,10 @@ import {
   type Team,
   type TeamStage,
 } from "./demo-data";
+import { demoTeamIdFor, normaliseEmail } from "./demo-access";
+import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "jgi-sih-demo-state-v1";
+const STORAGE_KEY = "isih-workspace-v2";
 
 export interface NotificationItem {
   id: string;

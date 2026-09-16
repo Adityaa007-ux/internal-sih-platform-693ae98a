@@ -45,6 +45,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { canAccess } from "@/lib/access";
 
 interface NavItem {
   to: string;
@@ -405,7 +406,22 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 sm:py-8">
+          {allowed ? (
+            children
+          ) : (
+            <div className="surface-card mx-auto mt-10 max-w-md p-8 text-center">
+              <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-danger-soft text-danger">
+                <ShieldCheck className="size-6" />
+              </span>
+              <h1 className="mt-4 font-display text-lg font-bold">Not part of your role</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                This page belongs to a different role. Your {ROLE_LABEL[role]} account only opens the pages listed in
+                your sidebar.
+              </p>
+            </div>
+          )}
+        </main>
 
         <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
           Internal SIH Platform · Prototype with demo data · Final selection is made by the faculty

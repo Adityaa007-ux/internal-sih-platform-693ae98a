@@ -190,9 +190,13 @@ export function AppShell({ children }: { children: ReactNode }) {
     setSearchOpen(false);
   }, [pathname]);
 
-  const groups = NAV.map((g) => ({ ...g, items: g.items.filter((i) => i.roles.includes(role)) })).filter(
-    (g) => g.items.length,
-  );
+  // Role access is decided by ROLE_ROUTES only — a role never sees another
+  // role's pages in the sidebar, and cannot open them by typing the address.
+  const groups = NAV.map((g) => ({
+    ...g,
+    items: g.items.filter((i) => i.roles.includes(role) && canAccess(role, i.to)),
+  })).filter((g) => g.items.length);
+  const allowed = canAccess(role, pathname);
 
   const sidebar = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">

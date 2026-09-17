@@ -4,11 +4,17 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionInfo, type SessionInfo, type PortalRole } from "@/lib/auth.functions";
 import { registerSession } from "@/lib/sessions.functions";
+import { clearActiveRole, getActiveRole } from "@/lib/active-role";
 
 export function useSession() {
   const fetchSession = useServerFn(getSessionInfo);
   const trackSession = useServerFn(registerSession);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [activeRole, setActiveRoleState] = useState<PortalRole | null>(null);
+
+  useEffect(() => {
+    setActiveRoleState(getActiveRole());
+  }, []);
 
   useEffect(() => {
     let active = true;

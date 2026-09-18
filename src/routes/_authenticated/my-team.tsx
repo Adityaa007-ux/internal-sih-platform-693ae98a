@@ -5,6 +5,9 @@ import { Award, Briefcase, Lock, Users } from "lucide-react";
 import { getMyTeam } from "@/lib/team.functions";
 import { EmptyState, PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
+import { useStore } from "@/lib/store";
+import type { Team } from "@/lib/demo-data";
+import { PS_RECORDS } from "@/lib/ps-repository";
 
 export const Route = createFileRoute("/_authenticated/my-team")({
   head: () => ({

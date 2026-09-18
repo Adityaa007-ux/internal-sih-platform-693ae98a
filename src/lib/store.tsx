@@ -114,25 +114,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // addresses; every other account starts completely blank.
   useEffect(() => {
     let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
+
+    const apply = (rawEmail: string | undefined) => {
       if (!active) return;
-      const email = normaliseEmail(data.session?.user?.email);
+      const email = normaliseEmail(rawEmail);
       const demoTeam = demoTeamIdFor(email);
       const key = `${STORAGE_KEY}:${email || "guest"}`;
       const base = demoTeam ? demoState(demoTeam) : blankState();
       let next = base;
       try {
         const raw = window.localStorage.getItem(key);
-        if (raw) next = { ...base, ...(JSON.parse(raw) as PersistedState) };
+        if (raw) {
+          const saved = JSON.parse(raw) as PersistedState;
+          next = { ...base, ...saved };
+          // A demo account always keeps its demo workspace, even if an older
+          // blank snapshot was stored before.
+          if (demoTeam && (!saved.teams || saved.teams.length === 0)) next = base;
+        }
       } catch {
         /* ignore corrupt local state */
       }
       setState(next);
       setStorageKey(key);
       setHydrated(true);
+    };
+
+    void supabase.auth.getSession().then(({ data }) => apply(data.session?.user?.email));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      apply(session?.user?.email);
     });
+
     return () => {
       active = false;
+      sub.subscription.unsubscribe();
     };
   }, []);
 

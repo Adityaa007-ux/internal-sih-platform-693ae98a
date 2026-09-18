@@ -36,6 +36,7 @@ import {
 } from "@/lib/institutions.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { setActiveRole } from "@/lib/active-role";
 
 export const Route = createFileRoute("/")({
   head: () => ({

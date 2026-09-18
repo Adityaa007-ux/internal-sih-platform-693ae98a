@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { CalendarClock, CheckCircle2, Clock } from "lucide-react";
-import { listDeadlines } from "@/lib/admin.functions";
-import { DEADLINES } from "@/lib/demo-data";
+import { useDeadlines, type DeadlineRow } from "@/lib/deadlines";
 import { EmptyState, PageHeader } from "@/components/common";
 import { cn } from "@/lib/utils";
 

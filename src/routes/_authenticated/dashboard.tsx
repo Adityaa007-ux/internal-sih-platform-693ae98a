@@ -17,7 +17,8 @@ import {
   Users,
 } from "lucide-react";
 import { useStore, combinedScore } from "@/lib/store";
-import { DEADLINES, DEMO_USERS, problemById } from "@/lib/demo-data";
+import { DEMO_USERS, problemById } from "@/lib/demo-data";
+import { useDeadlines } from "@/lib/deadlines";
 import { useSession } from "@/hooks/useSession";
 import { DemoBadge, EmptyState, PageHeader, StagePipeline, StatCard, StatusPill } from "@/components/common";
 import { Button } from "@/components/ui/button";
@@ -65,27 +66,32 @@ function QuickAction({ to, label, icon: Icon }: { to: string; label: string; ico
 }
 
 function UpcomingDeadlines() {
+  const { rows } = useDeadlines();
+  const now = Date.now();
   return (
     <div className="surface-card p-5">
       <div className="flex items-center gap-2">
         <CalendarClock className="size-4 text-primary" />
         <h2 className="font-display text-sm font-semibold">Deadlines</h2>
+        <Link to="/deadlines" className="ml-auto text-xs font-medium text-primary hover:underline">
+          View all
+        </Link>
       </div>
       <ul className="mt-4 space-y-3">
-        {DEADLINES.map((d) => (
-          <li key={d.label} className="flex items-center gap-3">
-            <span
-              className={`size-2 shrink-0 rounded-full ${d.done ? "bg-success" : "bg-warning"}`}
-              aria-hidden
-            />
-            <span className={`flex-1 text-sm ${d.done ? "text-muted-foreground line-through" : "font-medium"}`}>
-              {d.label}
-            </span>
-            <span className="text-xs tabular-nums text-muted-foreground">
-              {new Date(d.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
-            </span>
-          </li>
-        ))}
+        {rows.map((d) => {
+          const past = new Date(d.due_at).getTime() < now;
+          return (
+            <li key={d.id} className="flex items-center gap-3">
+              <span className={`size-2 shrink-0 rounded-full ${past ? "bg-success" : "bg-warning"}`} aria-hidden />
+              <span className={`flex-1 text-sm ${past ? "text-muted-foreground line-through" : "font-medium"}`}>
+                {d.label}
+              </span>
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {new Date(d.due_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

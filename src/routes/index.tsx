@@ -36,6 +36,7 @@ import {
 } from "@/lib/institutions.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { setActiveRole } from "@/lib/active-role";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -161,8 +162,9 @@ function AuthPage() {
         refresh_token: res.refreshToken,
       });
       if (error) throw new Error(error.message);
+      setActiveRole(role);
       toast.success(`Welcome back, ${res.fullName || "there"}.`);
-      await navigate({ to: landingFor(res.role) });
+      window.location.assign(landingFor(role));
     } catch (e) {
       err(e, "Sign in failed. Please check your email and password.");
     } finally {

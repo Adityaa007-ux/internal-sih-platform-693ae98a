@@ -56,11 +56,17 @@ export function useSession() {
       .map((p) => p[0]?.toUpperCase() ?? "")
       .join("") || "U";
 
+  const dbRoles = (query.data?.roles ?? []) as PortalRole[];
+  // The role the user picked on the login screen wins, as long as the account
+  // really has that role in the database.
+  const effectiveRole =
+    activeRole && dbRoles.includes(activeRole) ? activeRole : ((query.data?.role ?? null) as PortalRole | null);
+
   return {
     ...query,
     isSignedIn: hasToken === true,
-    role: (query.data?.role ?? null) as PortalRole | null,
-    roles: query.data?.roles ?? [],
+    role: effectiveRole,
+    roles: dbRoles,
     profile,
     name,
     initials,
@@ -74,6 +80,7 @@ export async function signOutEverywhere() {
   } catch {
     /* ignore */
   }
+  clearActiveRole();
   try {
     localStorage.removeItem("jgi-sih-demo-state-v1");
     Object.keys(localStorage)

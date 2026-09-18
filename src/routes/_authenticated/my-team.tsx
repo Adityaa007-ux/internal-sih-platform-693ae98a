@@ -26,8 +26,12 @@ export const Route = createFileRoute("/_authenticated/my-team")({
 function MyTeam() {
   const fetchTeam = useServerFn(getMyTeam);
   const { data, isLoading } = useQuery({ queryKey: ["my-team"], queryFn: () => fetchTeam() });
+  const { currentTeam, hydrated } = useStore();
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading your team…</p>;
+  if (isLoading || !hydrated) return <p className="text-sm text-muted-foreground">Loading your team…</p>;
+
+  // Demo accounts keep their pre-seeded workspace team when no live team exists.
+  if (!data?.team && currentTeam) return <DemoTeamView team={currentTeam} />;
 
   if (!data?.team) {
     return (

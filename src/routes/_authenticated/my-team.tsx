@@ -147,3 +147,113 @@ function MyTeam() {
     </div>
   );
 }
+
+function DemoTeamView({ team }: { team: Team }) {
+  const ps = team.problemId ? PS_RECORDS.find((r) => r.psId === team.problemId) ?? null : null;
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title={team.name}
+        description={`${team.regId}${team.campus ? ` · ${team.campus}` : ""}${team.department ? ` · ${team.department}` : ""}`}
+        icon={Users}
+        actions={
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold">
+              <Lock className="size-3.5" /> Demo team
+            </span>
+            <Button asChild variant="outline">
+              <Link to="/certificates">
+                <Award className="size-4" /> Certificate
+              </Link>
+            </Button>
+          </>
+        }
+      />
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="surface-card overflow-hidden lg:col-span-2">
+          <div className="border-b border-border px-5 py-4">
+            <h2 className="font-display text-sm font-semibold">Team members ({team.members.length}/6)</h2>
+          </div>
+          <ul className="divide-y divide-border">
+            {team.members.map((m, i) => (
+              <li key={`${m.prn}-${i}`} className="flex flex-wrap items-center gap-3 px-5 py-3.5">
+                <span className="flex size-9 items-center justify-center rounded-full bg-primary-soft font-display text-xs font-bold text-primary">
+                  {m.name
+                    .split(" ")
+                    .map((s) => s[0])
+                    .join("")
+                    .slice(0, 2)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">
+                    {m.name}
+                    {m.name === team.leader ? (
+                      <span className="ml-2 text-[10px] font-bold uppercase text-primary">Leader</span>
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {[m.prn, m.department, m.year].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground">{m.skills}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <div className="surface-card p-5">
+            <h2 className="font-display text-sm font-semibold">Mentors</h2>
+            <p className="mt-3 text-sm">
+              <span className="text-muted-foreground">College mentor: </span>
+              {team.mentor ?? "Not assigned yet"}
+            </p>
+            <p className="mt-2 text-sm">
+              <span className="text-muted-foreground">Industrial mentor: </span>
+              Not connected yet
+            </p>
+            <Button asChild size="sm" variant="outline" className="mt-4">
+              <Link to="/industrial-mentor">
+                <Briefcase className="size-4" /> Find an industrial mentor
+              </Link>
+            </Button>
+          </div>
+
+          <div className="surface-card p-5">
+            <h2 className="font-display text-sm font-semibold">Problem statement</h2>
+            {team.problemId ? (
+              <div className="mt-3">
+                <span className="rounded-md bg-primary-soft px-2 py-0.5 font-display text-xs font-bold text-primary">
+                  {team.problemId}
+                </span>
+                <p className="mt-2 text-sm font-medium">{ps?.teamName ?? "Selected problem statement"}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{ps?.organization ?? ""}</p>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground">Not selected yet.</p>
+                <Button asChild size="sm" className="mt-3">
+                  <Link to="/repository">Choose a problem</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="surface-card p-5">
+            <h2 className="font-display text-sm font-semibold">Progress</h2>
+            <p className="mt-2 text-sm">
+              <span className="text-muted-foreground">Stage: </span>
+              {team.stage}
+            </p>
+            <p className="mt-1 text-sm">
+              <span className="text-muted-foreground">Proposal: </span>
+              {team.proposalStatus}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

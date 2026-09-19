@@ -60,11 +60,8 @@ export const ROLE_ROUTES: Record<Role, string[]> = {
   admin: [
     "/dashboard",
     "/admin",
-    "/dashboard",
-    "/admin",
     "/admin/students",
     "/admin/cycles",
-    "/recommendations",
     "/approvals",
     "/analytics",
     "/submissions",

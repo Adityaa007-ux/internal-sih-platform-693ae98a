@@ -16,22 +16,10 @@ export const Route = createFileRoute("/_authenticated/deadlines")({
   component: DeadlinesPage,
 });
 
-interface Row {
-  id: string;
-  label: string;
-  description: string;
-  due_at: string;
-}
+type Row = DeadlineRow;
 
 function DeadlinesPage() {
-  const fetchDeadlines = useServerFn(listDeadlines);
-  const { data, isLoading } = useQuery({ queryKey: ["deadlines"], queryFn: () => fetchDeadlines() });
-
-  const remote = (data as Row[] | undefined) ?? [];
-  const rows: Row[] =
-    remote.length > 0
-      ? remote
-      : DEADLINES.map((d, i) => ({ id: `local-${i}`, label: d.label, description: "", due_at: `${d.date}T17:00:00.000Z` }));
+  const { rows, isLoading } = useDeadlines();
 
   const now = Date.now();
 

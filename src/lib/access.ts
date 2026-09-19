@@ -32,7 +32,6 @@ export const ROLE_ROUTES: Record<Role, string[]> = {
     "/repository",
     "/analyzer",
     "/similarity",
-    "/recommendations",
     "/announcements",
     "/deadlines",
     "/settings",

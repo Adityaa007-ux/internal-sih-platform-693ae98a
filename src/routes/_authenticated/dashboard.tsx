@@ -47,7 +47,12 @@ function Dashboard() {
   if (role === "student") return <StudentDashboard />;
   if (role === "faculty") return <FacultyDashboard />;
   if (role === "mentor") return <MentorDashboard />;
-  return <AdminDashboard />;
+  if (role === "admin") return <AdminDashboard />;
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+      Loading your dashboard…
+    </div>
+  );
 }
 
 function QuickAction({ to, label, icon: Icon }: { to: string; label: string; icon: typeof Users }) {

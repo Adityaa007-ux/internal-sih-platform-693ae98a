@@ -32,7 +32,7 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = getRuntimeEnv('SUPABASE_URL');
+  const SUPABASE_URL = getRuntimeEnv('SUPABASE_URL') || 'https://efuzqmjlmdysdolwgvot.supabase.co';
   const SUPABASE_SERVICE_ROLE_KEY = getRuntimeEnv('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {

@@ -9,6 +9,24 @@ type ServerEntry = {
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
+function hydrateCloudflareRuntimeEnv(bindings: unknown) {
+  if (!bindings || typeof bindings !== "object") return;
+  const runtimeEnv = bindings as Record<string, unknown>;
+  const keys = [
+    "SUPABASE_URL",
+    "SUPABASE_PROJECT_ID",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "OTP_PEPPER",
+    "HUMAN_CHECK_SECRET",
+  ] as const;
+
+  for (const key of keys) {
+    const value = runtimeEnv[key];
+    if (typeof value === "string" && value.length > 0) process.env[key] ??= value;
+  }
+}
+
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
     serverEntryPromise = import("@tanstack/react-start/server-entry").then(
@@ -18,8 +36,6 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-// h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
@@ -47,6 +63,7 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      hydrateCloudflareRuntimeEnv(env);
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

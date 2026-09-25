@@ -7,8 +7,13 @@ import type { Database } from './types'
 function getRuntimeEnv(name: string): string | undefined {
   const processValue = process.env[name];
   if (typeof processValue === 'string' && processValue.length > 0) return processValue;
-  const runtime = (globalThis as typeof globalThis & { __JGI_CF_ENV__?: Record<string, unknown> }).__JGI_CF_ENV__;
-  const bindingValue = runtime?.[name];
+
+  const request = getRequest();
+  const cloudflareEnv = (request as Request & {
+    runtime?: { cloudflare?: { env?: Record<string, unknown> } };
+  }).runtime?.cloudflare?.env;
+
+  const bindingValue = cloudflareEnv?.[name];
   return typeof bindingValue === 'string' && bindingValue.length > 0 ? bindingValue : undefined;
 }
 
@@ -29,24 +34,33 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server(async ({ next }) => {
   const SUPABASE_URL = getRuntimeEnv('SUPABASE_URL');
   const SUPABASE_PUBLISHABLE_KEY = getRuntimeEnv('SUPABASE_PUBLISHABLE_KEY');
+
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [...(!SUPABASE_URL ? ['SUPABASE_URL'] : []), ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : [])];
     throw new Error(`Missing Supabase environment variable(s): ${missing.join(', ')}. Configure the Cloudflare runtime bindings.`);
   }
+
   const request = getRequest();
   if (!request?.headers) throw new Error('Unauthorized: No request headers available');
+
   const authHeader = request.headers.get('authorization');
   if (!authHeader) throw new Error('Unauthorized: No authorization header provided');
   if (!authHeader.startsWith('Bearer ')) throw new Error('Unauthorized: Only Bearer tokens are supported');
+
   const token = authHeader.replace('Bearer ', '');
   if (!token || token.split('.').length !== 3) throw new Error('Unauthorized: Invalid token');
 
   const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    global: { fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY), headers: { Authorization: `Bearer ${token}` } },
+    global: {
+      fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
+      headers: { Authorization: `Bearer ${token}` },
+    },
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
   });
+
   const { data, error } = await supabase.auth.getClaims(token);
   if (error || !data?.claims) throw new Error('Unauthorized: Invalid token');
   if (!data.claims.sub) throw new Error('Unauthorized: No user ID found in token');
+
   return next({ context: { supabase, userId: data.claims.sub, claims: data.claims } });
 });

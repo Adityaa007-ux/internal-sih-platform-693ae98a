@@ -140,11 +140,13 @@ function AuthPage() {
     );
   }, [campuses, campusSearch]);
 
+  // Always require a fresh login on this page: end any leftover session
+  // instead of skipping straight into a dashboard.
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) void navigate({ to: "/dashboard" });
+      if (data.session) void supabase.auth.signOut();
     });
-  }, [navigate]);
+  }, []);
 
   function err(e: unknown, fallback: string) {
     toast.error(e instanceof Error && e.message ? e.message : fallback);

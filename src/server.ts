@@ -12,7 +12,6 @@ let serverEntryPromise: Promise<ServerEntry> | undefined;
 function hydrateCloudflareRuntimeEnv(bindings: unknown) {
   if (!bindings || typeof bindings !== "object") return;
   const runtimeEnv = bindings as Record<string, unknown>;
-  (globalThis as typeof globalThis & { __JGI_CF_ENV__?: Record<string, unknown> }).__JGI_CF_ENV__ = runtimeEnv;
   const keys = [
     "SUPABASE_URL",
     "SUPABASE_PROJECT_ID",
